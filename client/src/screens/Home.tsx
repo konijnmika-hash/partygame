@@ -1,3 +1,4 @@
+import { P2P } from '../p2p/mode';
 import { useEffect, useMemo, useState } from 'react';
 import type { PublicRoomInfo } from '@shared/types';
 import { CATALOG } from '@shared/catalog/index';
@@ -64,7 +65,7 @@ export function Home() {
     <div className="page home">
       <header className="home-top">
         <div className="online-pill" title="Players online">
-          <span className={`dot ${connected ? 'on' : ''}`} /> {connected ? `${online.toLocaleString()} online` : 'connecting...'}
+          <span className={`dot ${connected ? 'on' : ''}`} /> {P2P ? 'Make a room, share the link!' : connected ? `${online.toLocaleString()} online` : 'connecting...'}
         </div>
         <SoundToggles />
       </header>
@@ -95,9 +96,9 @@ export function Home() {
         </button>
 
         <div className="home-actions">
-          <button className="btn btn-pink btn-xl btn-block play-btn" onClick={() => run('quick', quickPlay)} disabled={!!busy}>
+          {!P2P && <button className="btn btn-pink btn-xl btn-block play-btn" onClick={() => run('quick', quickPlay)} disabled={!!busy}>
             <span className="emoji">⚡</span> {busy === 'quick' ? 'Finding a party...' : 'Quick Play'}
-          </button>
+          </button>}
           <button className="btn btn-purple btn-xl btn-block" onClick={() => run('create', () => createRoom(profile.settings?.lastRoomSettings ?? null))} disabled={!!busy}>
             <span className="emoji">🎉</span> {busy === 'create' ? 'Creating...' : 'Create Room'}
           </button>
@@ -133,7 +134,7 @@ export function Home() {
           { k: 'friends', e: '👯', t: 'Friends' },
           { k: 'profile', e: '🏅', t: 'Profile' },
           { k: 'settings', e: '⚙️', t: 'Settings' },
-        ].map((n) => (
+        ].filter((n) => !P2P || (n.k !== 'leaderboard' && n.k !== 'friends')).map((n) => (
           <button key={n.k} className="nav-tile" onClick={() => { sfx('click'); go(n.k as any); }}>
             <span className="nav-emoji">{n.e}</span>
             <span>{n.t}</span>

@@ -4,12 +4,19 @@ import wordListPath from 'word-list';
 import { containsProfanity } from '@shared/validation';
 
 let dict: Set<string> | null = null;
+let injected: string | null = null;
+
+/** Browser host: provide the word list text instead of reading it from disk. */
+export function setDictionaryText(raw: string): void {
+  injected = raw;
+  dict = null;
+}
 let byLen: Map<number, string[]> | null = null;
 
 /** All dictionary words (lowercase a-z, 2..10 letters). Loaded once, lazily. */
 export function dictionary(): Set<string> {
   if (dict) return dict;
-  const raw = fs.readFileSync(wordListPath, 'utf8');
+  const raw = injected ?? fs.readFileSync(wordListPath, 'utf8');
   const set = new Set<string>();
   const lens = new Map<number, string[]>();
   for (const w of raw.split('\n')) {

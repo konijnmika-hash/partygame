@@ -1,3 +1,4 @@
+import { P2P } from '../p2p/mode';
 import { useState } from 'react';
 import { validatePassword, validateUsername } from '@shared/validation';
 import { ACHIEVEMENT_MAP } from '@shared/achievements';
@@ -75,7 +76,9 @@ export default function Settings() {
 
       <section className="glass stack" style={{ marginTop: 14 }}>
         <div className="panel-title">👤 Account</div>
-        {profile.registered ? (
+        {P2P ? (
+          <p className="small">Your name, look and level are saved on this device.</p>
+        ) : profile.registered ? (
           <>
             <p>Signed in as <b>{profile.name}</b>. Your progress is saved to your account.</p>
             <button className="btn btn-red btn-sm" style={{ alignSelf: 'flex-start' }} onClick={logout}>Sign out</button>
@@ -90,15 +93,15 @@ export default function Settings() {
             </form>
           </>
         )}
-        <div className="divider" />
-        <details>
+        {!P2P && <div className="divider" />}
+        {!P2P && <details>
           <summary className="small">Sign in to another account</summary>
           <form className="stack-s" style={{ marginTop: 10 }} onSubmit={(e) => { e.preventDefault(); login(); }}>
             <input className="input" value={loginName} onChange={(e) => setLoginName(e.target.value)} placeholder="Username" autoComplete="username" aria-label="Login username" />
             <input className="input" type="password" value={loginPw} onChange={(e) => setLoginPw(e.target.value)} placeholder="Password" autoComplete="current-password" aria-label="Login password" />
             <button className="btn btn-blue" type="submit" disabled={busy || !loginName || !loginPw}>Sign in</button>
           </form>
-        </details>
+        </details>}
       </section>
 
       <section className="glass stack-s small" style={{ marginTop: 14 }}>

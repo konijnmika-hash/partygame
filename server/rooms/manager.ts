@@ -1,5 +1,5 @@
 // Owns all rooms, user->room membership, room codes, public matchmaking and the global tick loop.
-import crypto from 'node:crypto';
+import { randomInt } from '../util/rand';
 import type { PublicProfile, PublicRoomInfo, RoomSettings } from '@shared/types';
 import { ROOM_CODE_ALPHABET, ROOM_CODE_LENGTH, normalizeRoomCode } from '@shared/validation';
 import { STEP_MS } from '../engine/runner';
@@ -54,7 +54,7 @@ export class RoomManager {
   private newCode(): string {
     for (let i = 0; i < 1000; i++) {
       let c = '';
-      for (let k = 0; k < ROOM_CODE_LENGTH; k++) c += ROOM_CODE_ALPHABET[crypto.randomInt(ROOM_CODE_ALPHABET.length)];
+      for (let k = 0; k < ROOM_CODE_LENGTH; k++) c += ROOM_CODE_ALPHABET[randomInt(ROOM_CODE_ALPHABET.length)];
       if (!this.rooms.has(c)) return c;
     }
     throw new Error('No room codes available');
@@ -71,10 +71,10 @@ export class RoomManager {
     return room;
   }
 
-  create(user: PublicProfile, settings: Partial<RoomSettings> | null, isPublic = false): Room | string {
+  create(user: PublicProfile, settings: Partial<RoomSettings> | null, isPublic = false, code?: string): Room | string {
     if (this.rooms.size >= (this.deps.maxRooms ?? 2000)) return 'Servers are full right now, try again soon';
     this.leave(user.id);
-    const room = new Room(this.newCode(), isPublic, this.roomDeps, settings);
+    const room = new Room(code && !this.rooms.has(code) ? code : this.newCode(), isPublic, this.roomDeps, settings);
     this.rooms.set(room.code, room);
     room.addHuman(user);
     return room;

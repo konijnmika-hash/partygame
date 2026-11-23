@@ -131,6 +131,19 @@ async function main() {
     await guest.screenshot({ path: `${shotDir}/flow-final-mobile.png` });
   }
 
+  if (process.env.STATIC_BUILD) {
+    // browser-hosted build: no leaderboards; just make sure the host can close the party
+    step('host leaves: the party closes for the guest');
+    await host.getByRole('button', { name: /Leave/ }).first().click();
+    await guest.waitForFunction(() => !window.__bb.get().room, null, { timeout: 15000 });
+    await browser.close();
+    if (errors.length) {
+      console.log('FAIL: page errors\n  ' + errors.slice(0, 10).join('\n  '));
+      process.exit(1);
+    }
+    console.log('PASS: full session flow (static build)');
+    return;
+  }
   step('back to the lobby, leave, and check the leaderboards');
   await host.getByRole('button', { name: /Back to lobby/ }).click();
   await waitPhase(host, ['lobby']);

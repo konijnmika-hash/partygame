@@ -6,6 +6,8 @@ import { addClockSample, hintServerTime } from './clock';
 import { api } from './api';
 import { addEmote, get, go, pushGameEvent, resetGame, set, toast } from '../state/store';
 import { sfx } from '../audio/sfx';
+import { P2P } from '../p2p/mode';
+
 
 type S = Socket<ServerToClientEvents, ClientToServerEvents>;
 
@@ -54,9 +56,26 @@ export async function refreshProfile(): Promise<void> {
   if (r.ok && r.data) set({ profile: r.data });
 }
 
+let local: typeof import('../p2p/local') | null = null;
+let connecting = false;
+
 export function connectSocket(): void {
-  if (socket) return;
-  const s: S = io({ withCredentials: true, transports: ['websocket', 'polling'], reconnectionDelay: 600, reconnectionDelayMax: 4000 });
+  if (socket || connecting) return;
+  if (!P2P) return wire(io({ withCredentials: true, transports: ['websocket', 'polling'], reconnectionDelay: 600, reconnectionDelayMax: 4000 }));
+  // static build: rooms are hosted in the browser (engine + games load only here)
+  connecting = true;
+  void Promise.all([import('../p2p/link'), import('../p2p/local')]).then(([link, loc]) => {
+    local = loc;
+    wire(
+      new link.P2PSocket(() => {
+        const p = get().profile;
+        return p ? { id: p.id, name: p.name, avatar: p.avatar, level: p.level, title: p.title } : null;
+      }) as unknown as S,
+    );
+  });
+}
+
+function wire(s: S): void {
   socket = s;
 
   s.on('connect', () => {
@@ -115,8 +134,14 @@ export function connectSocket(): void {
     else if (reason === 'timeout') toast('You were away too long and left the room.', 'info');
     else if (reason === 'closed') toast('The room closed.', 'info');
   });
-  s.on('room:results', (r) => set({ results: r }));
-  s.on('room:final', (f) => set({ final: f }));
+  s.on('room:results', (r) => {
+    set({ results: r });
+    if (local) localXp(local.localRoundProgress(r));
+  });
+  s.on('room:final', (f) => {
+    set({ final: f });
+    if (local) localXp(local.localFinalProgress(f));
+  });
   s.on('game:reset', (gameId) => resetGame(gameId));
   s.on('game:pub', (pub, t) => {
     hintServerTime(t);
@@ -153,6 +178,16 @@ export function connectSocket(): void {
     sfx('blip');
     toast(`${inv.from} invited you to a party!`, 'info', { emoji: '💌', action: { label: 'Join', run: () => joinRoom(inv.code) } });
   });
+}
+
+/** Static build: XP is earned on this device. */
+function localXp(p: { gained: number; before: number; after: number } | null) {
+  if (!p) return;
+  if (p.after > p.before) {
+    toast(`Level up! You are now level ${p.after}`, 'achievement', { emoji: '⭐' });
+    sfx('levelup');
+  }
+  refreshProfile();
 }
 
 export async function joinRoom(code: string): Promise<boolean> {
@@ -207,5 +242,5 @@ function updateUrl(code: string | null) {
 }
 
 export function inviteLink(code: string): string {
-  return `${window.location.origin}/?join=${code}`;
+  return `${window.location.origin}${import.meta.env.BASE_URL}?join=${code}`;
 }

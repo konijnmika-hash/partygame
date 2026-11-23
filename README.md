@@ -24,6 +24,15 @@ the score.
   and rate-limited; scores are never accepted from a client. Predicted real-time games are
   re-simulated on the server from timestamped inputs.
 
+## Play online (GitHub Pages)
+
+**https://konijnmika-hash.github.io/partygame/**: open it, tap **Create Room** and share the link
+or code. The browser of the player who creates the room acts as the game server, and friends
+connect directly to it (WebRTC, via the free PeerJS service). The host must keep their tab open.
+This version has no accounts, leaderboards, friends or Quick Play; name, look and level are saved
+on each device. Every push to `main` publishes it through `.github/workflows/pages.yml`.
+Build it yourself with `npm run build:pages` (output in `dist/pages`).
+
 ## Quick start
 
 Requires Node.js 22+.

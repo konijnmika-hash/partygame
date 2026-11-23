@@ -5,7 +5,10 @@ export interface ApiResult<T = any> {
   progress?: any;
 }
 
+import { P2P } from '../p2p/mode';
+
 export async function api<T = any>(path: string, opts: { method?: string; body?: unknown } = {}): Promise<ApiResult<T>> {
+  if (P2P) return (await import('../p2p/local')).localApi<T>(path, opts as any);
   try {
     const res = await fetch(`/api${path}`, {
       method: opts.method ?? 'GET',

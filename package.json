@@ -17,13 +17,16 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "node tests/e2e/run.mjs",
-    "games:doc": "tsx scripts/games-doc.ts"
+    "games:doc": "tsx scripts/games-doc.ts",
+    "build:pages": "vite build --mode pages",
+    "preview:pages": "vite preview --mode pages --outDir dist/pages"
   },
   "dependencies": {
     "@fontsource/fredoka": "^5.3.0",
     "@fontsource/nunito": "^5.3.0",
     "better-sqlite3": "^13.2.0",
     "express": "^5.3.0",
+    "peerjs": "^1.5.4",
     "qrcode-generator": "^2.0.4",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
@@ -41,6 +44,7 @@
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^5.2.0",
     "esbuild": "^0.28.2",
+    "peer": "^1.0.2",
     "tsx": "^4.23.15",
     "typescript": "^5.9.3",
     "vite": "^7.3.8",

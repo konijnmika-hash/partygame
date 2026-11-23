@@ -1,5 +1,5 @@
 // A party room: members, host controls, the session/round state machine and game runner glue.
-import crypto from 'node:crypto';
+import { randomInt, randomUUID } from '../util/rand';
 import type {
   Avatar, ChatMessage, FinalResults, InputFrame, PublicProfile, RoomMember, RoomPhase, RoomSettings, RoomState,
   RoundInfo, RoundResults, Standing, TeamStanding, Award,
@@ -84,7 +84,7 @@ export const TIMING = {
 const MAX_CHAT = 60;
 
 export class Room {
-  readonly id = crypto.randomUUID();
+  readonly id = randomUUID();
   readonly channel: string;
   readonly createdAt: number;
   members = new Map<string, Member>();
@@ -371,7 +371,7 @@ export class Room {
     if (!m) return;
     const clean = sanitizeText(text, 200);
     if (!clean) return;
-    this.pushChat({ id: crypto.randomUUID(), from: userId, name: m.name, text: clean, at: this.now() });
+    this.pushChat({ id: randomUUID(), from: userId, name: m.name, text: clean, at: this.now() });
   }
 
   emote(userId: string, emote: unknown): void {
@@ -382,7 +382,7 @@ export class Room {
   }
 
   private systemChat(text: string) {
-    this.pushChat({ id: crypto.randomUUID(), from: 'system', name: 'Bloop Bash', text, at: this.now() });
+    this.pushChat({ id: randomUUID(), from: 'system', name: 'Bloop Bash', text, at: this.now() });
   }
 
   private pushChat(msg: ChatMessage) {
@@ -428,7 +428,7 @@ export class Room {
     const players = this.participantsForStart();
     if (players.length < 2) return 'Need at least 2 players (add a bot!)';
     this.session = {
-      id: crypto.randomUUID(),
+      id: randomUUID(),
       startedAt: this.now(),
       total: this.settings.rounds,
       index: -1,
@@ -542,7 +542,7 @@ export class Room {
     };
     this.runner = new GameRunner(def, meta, players, {
       clock: this.deps.clock,
-      seed: crypto.randomInt(1, 2 ** 31 - 1),
+      seed: randomInt(1, 2 ** 31 - 1),
       difficulty: this.settings.difficulty,
       timeScale: this.settings.rules.speedMode ? 0.75 : 1,
       io,
