@@ -31,16 +31,20 @@ export function tokenFromRequest(req: Request): string | null {
   return tokenFromHeaders({ cookie: req.headers.cookie, authorization: req.headers.authorization });
 }
 
+function secureFor(res: Response): boolean {
+  return config.cookieSecure === 'auto' ? !!res.req?.secure : config.cookieSecure;
+}
+
 export function setTokenCookie(res: Response, token: string): void {
   res.cookie(COOKIE_NAME, token, {
     httpOnly: true,
     sameSite: 'lax',
-    secure: config.cookieSecure,
+    secure: secureFor(res),
     maxAge: config.sessionDays * 86400_000,
     path: '/',
   });
 }
 
 export function clearTokenCookie(res: Response): void {
-  res.clearCookie(COOKIE_NAME, { path: '/', httpOnly: true, sameSite: 'lax', secure: config.cookieSecure });
+  res.clearCookie(COOKIE_NAME, { path: '/', httpOnly: true, sameSite: 'lax', secure: secureFor(res) });
 }

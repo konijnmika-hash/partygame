@@ -14,7 +14,7 @@ export const ARCADE = [
     'Turn left and right to avoid every wall.',
     'Trap your rivals!',
     'Last rider alive wins each round. Three rounds.',
-  ], ['swipe', 'keys', 'tap'], 2, 8, 90, A),
+  ], ['swipe', 'keys', 'tap'], 2, 8, 50, A),
   g('hungry-blobs', 'Hungry Blobs', '🍩', 'Eat pellets. Grow. Gobble smaller Bloops.', [
     'Eat pellets to grow bigger.',
     'Bigger Bloops can swallow smaller ones!',
@@ -26,7 +26,7 @@ export const ARCADE = [
     'Zombies tag humans to infect them.',
     'Humans score for every second survived; zombies score per infection.',
     'Last human standing wins big.',
-  ], ['joystick', 'keys'], 3, 12, 75, A),
+  ], ['joystick', 'keys'], 3, 12, 60, A),
   g('snowball-fight', 'Snowball Fight', '❄️', 'Grab snow. Aim. Splat!', [
     'Pick up snowballs from snow piles.',
     'Aim with movement and press THROW.',

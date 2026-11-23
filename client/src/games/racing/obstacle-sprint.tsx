@@ -5,7 +5,7 @@ import { GhostCanvas, lerp, type GhostPub } from '../../game/GhostCanvas';
 import { sprintDef, SP_SHAPES, type SPState, type SPWorld } from '@shared/ghosts/sprint';
 import { drawBloop, roundRect, text } from '../../game/canvas';
 import { TouchControls } from '../../game/Joystick';
-import { usePortrait, useSwipe } from '../../game/kit';
+import { usePortrait } from '../../game/kit';
 import { virtual } from '../../game/input';
 import { sfx, vibrate } from '../../audio/sfx';
 
@@ -26,12 +26,34 @@ export default function ObstacleSprint({ pub, priv, me, isPlayer, send, player }
   const PX = portrait ? 170 : 260;
   const lastHits = useRef(0);
   const lastCleared = useRef(0);
-  const swipe = useSwipe((d) => {
-    if (d === 'up') pulse('a');
-    else if (d === 'down') pulse('b');
-  });
+  // canvas gestures: swipe down = slide and swipe up = jump (both fire as soon as they are
+  // recognised), a plain tap = jump on release. The JUMP / SLIDE buttons stay instant.
+  const gesture = useRef<{ x: number; y: number; done: boolean } | null>(null);
+  const onButtons = (e: React.PointerEvent) => !!(e.target as HTMLElement).closest('.touch-controls');
+  const gestures = {
+    onPointerDown: (e: React.PointerEvent) => {
+      gesture.current = onButtons(e) ? null : { x: e.clientX, y: e.clientY, done: false };
+    },
+    onPointerMove: (e: React.PointerEvent) => {
+      const g = gesture.current;
+      if (!g || g.done) return;
+      const dy = e.clientY - g.y;
+      if (dy > 24) {
+        g.done = true;
+        pulse('b');
+      } else if (dy < -24) {
+        g.done = true;
+        pulse('a');
+      }
+    },
+    onPointerUp: () => {
+      const g = gesture.current;
+      gesture.current = null;
+      if (g && !g.done) pulse('a');
+    },
+  };
   return (
-    <div className="g-stage full" style={{ position: 'relative' }} {...(isPlayer ? swipe : {})}>
+    <div className="g-stage full" style={{ position: 'relative', touchAction: 'none' }} {...(isPlayer ? gestures : {})}>
       <GhostCanvas<SPWorld, SPState>
         def={sprintDef}
         pub={pub}
@@ -39,7 +61,7 @@ export default function ObstacleSprint({ pub, priv, me, isPlayer, send, player }
         me={me}
         isPlayer={isPlayer}
         send={send}
-        tapToA
+        tapToA={false}
         worldSize={() => ({ w: VW, h: VH })}
         draw={(ctx, d) => {
           const w = d.world;

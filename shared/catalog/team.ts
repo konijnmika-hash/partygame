@@ -74,5 +74,5 @@ export const TEAM = [
     'Tapping on the beat gives a power pull!',
     'Pull the rope past your line to win.',
     'Best of three pulls.',
-  ], ['tap'], 2, 16, 60, { teams: true, original: true }),
+  ], ['tap'], 2, 16, 80, { teams: true, original: true }),
 ];

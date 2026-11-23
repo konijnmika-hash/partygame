@@ -13,7 +13,7 @@ export const PUZZLE = [
     'Tap the letters in the right order to unscramble it.',
     'First to solve scores the most.',
     'Eight words.',
-  ], ['tap', 'type'], 2, 16, 100),
+  ], ['tap', 'type'], 2, 16, 150),
   g('anagram-race', 'Anagram Race', '🅰️', 'Make as many words as you can from 7 letters.', [
     'You get seven letters.',
     'Make as many words (3+ letters) as you can.',

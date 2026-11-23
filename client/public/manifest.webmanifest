@@ -1,7 +1,7 @@
 {
   "name": "Bloop Bash",
   "short_name": "Bloop Bash",
-  "description": "150 chaotic multiplayer party minigames",
+  "description": "100+ chaotic multiplayer party minigames",
   "start_url": "/",
   "display": "standalone",
   "orientation": "any",

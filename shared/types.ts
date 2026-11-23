@@ -28,7 +28,7 @@ export interface GameMeta {
   orientation?: 'any' | 'landscape';
   needsSound?: boolean;
   mic?: 'optional';
-  /** true for the 50+ original games invented for Bloop Bash */
+  /** true for games invented for Bloop Bash on top of the classic party-game list */
   original?: boolean;
   tags?: string[];
 }

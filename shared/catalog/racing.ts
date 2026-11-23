@@ -13,7 +13,7 @@ export const RACING = [
     'Spikes send you back to the last checkpoint.',
     'Everyone runs the same level — see their ghosts!',
     'Fastest finish wins.',
-  ], ['joystick', 'keys', 'tap'], 2, 16, 45, { realtime: 'ghost', orientation: 'landscape' }),
+  ], ['joystick', 'keys', 'tap'], 2, 16, 70, { realtime: 'ghost', orientation: 'landscape' }),
   g('obstacle-sprint', 'Obstacle Sprint', '🏃‍♀️', 'Auto-run. Jump hurdles. Slide under bars.', [
     'Your Bloop runs automatically.',
     'Tap / swipe up to jump hurdles.',

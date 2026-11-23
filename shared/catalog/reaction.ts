@@ -7,31 +7,31 @@ export const REACTION = [
     'The instant it turns green, tap as fast as you can!',
     'Tapping early is a false start.',
     'Five rounds — your average reaction time counts.',
-  ], ['tap'], 2, 16, 50),
+  ], ['tap'], 2, 16, 35),
   g('fake-button', 'Fake Button', '🔴', 'Only tap the REAL button.', [
     'Buttons flash with different labels and colours.',
     'Tap ONLY when the real green GO button appears.',
     'Decoys cost points. Hesitation costs speed.',
     'Fifteen flashes of pure paranoia.',
-  ], ['tap'], 2, 16, 60),
+  ], ['tap'], 2, 16, 35),
   g('color-reaction', 'Color Reaction', '🌈', 'Tap the INK colour, not the word.', [
     'A colour word appears painted in a different ink.',
     'Tap the button that matches the INK colour.',
     'Speed and accuracy both count.',
     'It keeps getting faster!',
-  ], ['tap'], 2, 16, 60),
+  ], ['tap'], 2, 16, 45),
   g('reaction-duel', 'Reaction Duel', '🤠', 'Quick-draw showdown tournament.', [
     'Players face off in head-to-head duels.',
     'Wait for DRAW! — beware of fakes like DRAT! or DRAGON!',
     'First valid tap wins the duel; tapping early loses it.',
     'Winners advance through the bracket.',
-  ], ['tap'], 2, 16, 120),
+  ], ['tap'], 2, 16, 45),
   g('stop-5', 'Stop at Exactly 5 Seconds', '⏲️', 'Stop the clock at exactly the target.', [
     'A timer starts — then it disappears!',
     'Tap STOP when you think the target time is reached.',
     'The closer you are, the more points.',
     'Three targets. No peeking.',
-  ], ['tap'], 2, 16, 60),
+  ], ['tap'], 2, 16, 40),
   g('catch-falling', 'Catch the Falling Object', '🍎', 'Catch the fruit, dodge the bombs.', [
     'Fruit rains from the sky — move left and right to catch it.',
     'Golden fruit is worth extra.',
@@ -61,5 +61,5 @@ export const REACTION = [
     'Every challenge has its own rule — read fast!',
     'Points for speed and accuracy on every spin.',
     'Eight spins of chaos.',
-  ], ['tap'], 2, 16, 100),
+  ], ['tap'], 2, 16, 65),
 ];

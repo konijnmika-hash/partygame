@@ -1,6 +1,7 @@
 import type { GameMeta } from '@shared/types';
 import { CATEGORY_MAP } from '@shared/categories';
 import { hashString } from '@shared/rng';
+import { formatDuration } from '@shared/catalog/helpers';
 
 const PATTERNS = ['dots', 'stripes', 'waves', 'checks', 'rings', 'zigzag'];
 
@@ -31,7 +32,7 @@ export function GameTile({ meta, size = 'md', onClick, selected, disabled, badge
         <span className="gt-emoji">{meta.emoji}</span>
       </span>
       <span className="gt-name">{meta.name}</span>
-      {size !== 'sm' && <span className="gt-meta">{meta.minPlayers}–{meta.maxPlayers} players · ~{Math.round(meta.duration / 10) * 10}s</span>}
+      {size !== 'sm' && <span className="gt-meta">{meta.minPlayers}–{meta.maxPlayers} players · {formatDuration(meta.duration)}</span>}
       {meta.original && size !== 'sm' && <span className="gt-badge orig">NEW</span>}
       {badge && <span className="gt-badge">{badge}</span>}
       {selected && <span className="gt-check">✓</span>}

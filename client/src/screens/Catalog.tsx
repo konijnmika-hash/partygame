@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { CategoryId, GameMeta } from '@shared/types';
 import { CATALOG } from '@shared/catalog/index';
 import { CATEGORIES, CATEGORY_MAP } from '@shared/categories';
+import { formatDuration } from '@shared/catalog/helpers';
 import { api } from '../net/api';
 import { useStore } from '../state/store';
 import { TopBar } from '../components/TopBar';
@@ -60,7 +61,7 @@ export default function Catalog() {
             <div className="row">
               <span className="chip" style={{ background: CATEGORY_MAP[sel.category].color, color: '#fff' }}>{CATEGORY_MAP[sel.category].emoji} {CATEGORY_MAP[sel.category].name}</span>
               <span className="chip">👥 {sel.minPlayers}–{sel.maxPlayers}</span>
-              <span className="chip">⏱ ~{sel.duration}s</span>
+              <span className="chip">⏱ {formatDuration(sel.duration)}</span>
               {sel.teams && <span className="chip">🤝 Teams</span>}
               {sel.original && <span className="chip chip-pink">Bloop original</span>}
             </div>

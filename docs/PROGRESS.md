@@ -10,7 +10,9 @@ Working checklist. Each minigame = server logic (`server/games/<category>/`) + c
 - [x] Client: design system, avatar art, screens (home, lobby, intro, game, results, standings, final,
       leaderboards, profile, friends, catalog, settings), procedural SFX + music, input (keys/gamepad/joystick)
 - [x] Canvas frameworks: interpolated arena, client-predicted ghost sims, drawing canvas
-- [x] Tests: bot simulation per game, socket integration, browser smoke test per game
+- [x] Tests: bot simulation per game, deterministic sims, catalog integrity, socket integration,
+      Playwright end-to-end session flow (`npm run test:e2e`) and browser smoke test per game
+- [x] Docs (README, ARCHITECTURE, generated GAMES.md), app icons, Dockerfile
 
 ## Minigames
 - [x] Reaction (10/10)
