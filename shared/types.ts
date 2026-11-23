@@ -290,6 +290,7 @@ export interface ClientToServerEvents {
   'game:sync': () => void;
   'time:ping': (clientTime: number, ack: (serverTime: number) => void) => void;
   'presence:list': (ack: (r: Ack<{ online: number; rooms: PublicRoomInfo[] }>) => void) => void;
+  'friend:invite': (friendId: string) => void;
 }
 
 export interface GameEventMsg {
@@ -315,4 +316,5 @@ export interface ServerToClientEvents {
   'presence': (p: { online: number }) => void;
   'friends:update': () => void;
   'sping': (serverTime: number, ack: () => void) => void;
+  'invite': (inv: { from: string; code: string }) => void;
 }

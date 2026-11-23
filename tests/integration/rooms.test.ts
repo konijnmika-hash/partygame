@@ -99,7 +99,7 @@ describe('rooms + a full session', () => {
     const started = await emitAck<any>(sA, 'room:start');
     expect(started.ok).toBe(true);
     await waitFor(sB, 'room:state', (st) => st.phase === 'intro');
-    await waitFor(sB, 'room:state', (st) => st.phase === 'playing', undefined, 30000);
+    await waitFor(sB, 'room:state', (st) => st.phase === 'playing', 30000);
 
     // mid-game disconnect + reconnect of B
     sB.disconnect();

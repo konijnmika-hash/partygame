@@ -207,6 +207,16 @@ export function setupSockets(io: IO, deps: RealtimeDeps): void {
       ack({ ok: true, data: { online: presence.count(), rooms: manager.publicRooms() } });
     });
 
+    socket.on('friend:invite', (friendId) => {
+      if (!limits.chat.take() || typeof friendId !== 'string') return;
+      const room = manager.roomOf(userId);
+      if (!room || room.isPublic) return;
+      if (!repos.friends.friendIds(userId).includes(friendId)) return;
+      const u = repos.users.byId(userId);
+      if (!u) return;
+      for (const sid of presence.socketsOf(friendId)) io.to(sid).emit('invite', { from: u.username, code: room.code });
+    });
+
     socket.on('disconnect', () => {
       clearInterval(pingTimer);
       presence.remove(userId, socket.id);
