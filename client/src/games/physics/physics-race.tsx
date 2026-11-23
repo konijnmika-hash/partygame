@@ -5,9 +5,11 @@ import { GhostCanvas, lerp, type GhostPub } from '../../game/GhostCanvas';
 import { hillRaceDef, groundY, HR_HZ, HR_LEN, HR_CAR_H, type HRState, type HRWorld } from '@shared/ghosts/hillRace';
 import { drawBloop, roundRect, text } from '../../game/canvas';
 import { isTouchDevice, virtual } from '../../game/input';
+import { usePortrait } from '../../game/kit';
 import { sfx, vibrate } from '../../audio/sfx';
 
-const VW = 1000;
+const VW_WIDE = 1000;
+const VW_TALL = 620;
 const VH = 560;
 const CAR_COLORS = ['#ff4f5f', '#3da9fc', '#34cf78', '#ffb21f', '#a46bff', '#ff7ac8', '#2ad4c4', '#ff8a3d'];
 
@@ -72,6 +74,7 @@ function drawCar(ctx: CanvasRenderingContext2D, x: number, y: number, a: number,
 }
 
 export default function PhysicsRace({ pub, priv, me, isPlayer, send, player }: GameViewProps<GhostPub>) {
+  const VW = usePortrait() ? VW_TALL : VW_WIDE;
   const cam = useRef({ x: 0, y: 0, init: false });
   const lastFlips = useRef(0);
   const lastPerfect = useRef(0);
@@ -107,7 +110,7 @@ export default function PhysicsRace({ pub, priv, me, isPlayer, send, player }: G
             fy = lead.s.y;
           }
           const c = cam.current;
-          const tx = fx - 320;
+          const tx = fx - VW * 0.32;
           const ty = fy - 330;
           if (!c.init) {
             c.x = tx;

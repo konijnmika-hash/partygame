@@ -8,7 +8,8 @@ export interface GhostOpts<W, S> {
   /** compact public state for rendering a ghost (keep it small, it is broadcast at 10 Hz) */
   pubPlayer(s: S, sim: GhostSim<W, S>): unknown;
   score(w: W, s: S, sim: GhostSim<W, S>, ctx: GameCtx): { score: number; perf: number; highlight?: string; bonuses?: BreakdownLine[]; record?: RecordEntry };
-  bot(w: W, s: S, tick: number, rnd: () => number, skill: number): GInput;
+  /** `prev` is the input held on the previous tick (for edge-triggered buttons). */
+  bot(w: W, s: S, tick: number, rnd: () => number, skill: number, prev: GInput): GInput;
   summary?(ctx: GameCtx, scores: Record<string, number>): string[];
   /** extra public data computed from the world (e.g. remaining time) */
   extraPub?(w: W, ctx: GameCtx): Record<string, unknown>;
@@ -72,7 +73,7 @@ export function ghostGame<W, S>(def: GhostDef<W, S>, opts: GhostOpts<W, S>): Gam
       const sim = s.sims[pid];
       if (!sim || sim.doneAt != null) return null;
       const skill = ctx.diff(0.55, 0.75, 0.9);
-      const inp = opts.bot(s.world, sim.state, sim.tick, Math.random, skill);
+      const inp = opts.bot(s.world, sim.state, sim.tick, Math.random, skill, sim.inputs.at(sim.tick - 1));
       const cur = sim.inputs.at(sim.tick);
       if (cur[0] !== inp[0] || cur[1] !== inp[1] || cur[2] !== inp[2]) sim.applyInput(sim.tick, inp);
       ctx.markActed(pid);

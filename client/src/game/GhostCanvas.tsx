@@ -56,6 +56,8 @@ export function GhostCanvas<W, S>({ def, pub, priv, me, isPlayer, send, worldSiz
   const tapRef = useRef(0);
   const mapRef = useRef(inputMap);
   mapRef.current = inputMap;
+  const sizeRef = useRef(worldSize);
+  sizeRef.current = worldSize;
 
   // reconcile with authoritative state
   useEffect(() => {
@@ -97,13 +99,14 @@ export function GhostCanvas<W, S>({ def, pub, priv, me, isPlayer, send, worldSiz
         }
         if (elapsed >= 0) sim.advanceTo(target);
       }
-      const view = fitWorld(cv, worldSize(world).w, worldSize(world).h, 4);
+      const size = sizeRef.current(world);
+      const view = fitWorld(cv, size.w, size.h, 4);
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, cv.width, cv.height);
       applyView(ctx, view);
       ctx.save();
       ctx.beginPath();
-      ctx.rect(0, 0, worldSize(world).w, worldSize(world).h);
+      ctx.rect(0, 0, size.w, size.h);
       ctx.clip();
       const others = Object.entries(p.p).filter(([id]) => id !== me).map(([id, s]) => ({ id, s }));
       const tickFrac = elapsed > 0 ? (elapsed / tickMs) % 1 : 0;

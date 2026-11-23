@@ -381,6 +381,22 @@ export function DPad({ onDir, disabled }: { onDir: (d: 'up' | 'down' | 'left' | 
   );
 }
 
+/** True while the viewport is taller than wide (phones held upright). */
+export function usePortrait(): boolean {
+  const get = () => typeof window !== 'undefined' && window.innerHeight > window.innerWidth * 1.1;
+  const [p, setP] = useState(get);
+  useEffect(() => {
+    const on = () => setP(get());
+    window.addEventListener('resize', on);
+    window.addEventListener('orientationchange', on);
+    return () => {
+      window.removeEventListener('resize', on);
+      window.removeEventListener('orientationchange', on);
+    };
+  }, []);
+  return p;
+}
+
 /** Swipe detection on an element: calls back with a direction. */
 export function useSwipe(onSwipe: (d: 'up' | 'down' | 'left' | 'right') => void, minDist = 28) {
   const start = useRef<{ x: number; y: number } | null>(null);

@@ -7,13 +7,13 @@ export const RACING = [
     'Hit boost pads, avoid the oil slicks.',
     'Driving on grass slows you down.',
     'First to finish three laps wins.',
-  ], ['joystick', 'keys'], 2, 12, 120, { realtime: 'arena' }),
+  ], ['joystick', 'keys'], 2, 12, 60, { realtime: 'arena' }),
   g('speed-run', 'Speed Run', '🏃', 'Platform sprint to the flag.', [
     'Run and jump through the level to the flag.',
     'Spikes send you back to the last checkpoint.',
     'Everyone runs the same level — see their ghosts!',
     'Fastest finish wins.',
-  ], ['joystick', 'keys', 'tap'], 2, 16, 90, { realtime: 'ghost', orientation: 'landscape' }),
+  ], ['joystick', 'keys', 'tap'], 2, 16, 45, { realtime: 'ghost', orientation: 'landscape' }),
   g('obstacle-sprint', 'Obstacle Sprint', '🏃‍♀️', 'Auto-run. Jump hurdles. Slide under bars.', [
     'Your Bloop runs automatically.',
     'Tap / swipe up to jump hurdles.',
@@ -30,7 +30,7 @@ export const RACING = [
     'A giant rope swings around.',
     'Tap JUMP to clear it as it passes under you.',
     'Speed changes and double ropes appear.',
-    'Three misses and you are out.',
+    'Clear it at the top of your jump for bonus points. Three misses and you are out.',
   ], ['tap', 'keys'], 2, 16, 60, { realtime: 'ghost' }),
   g('dodge-objects', 'Dodge the Objects', '☄️', 'Meteors, lasers and chaos. Dodge it all.', [
     'Meteors fall where the shadows appear.',
@@ -49,13 +49,13 @@ export const RACING = [
     'Swipe, use arrows or tap a neighbouring cell to move.',
     'Reach the exit first.',
     'Three mazes, each bigger than the last.',
-  ], ['swipe', 'keys', 'tap'], 2, 16, 100),
+  ], ['swipe', 'keys', 'tap'], 2, 16, 75),
   g('bomb-dodge', 'Bomb Dodge', '💣', 'Pass the bomb before it blows!', [
     'One Bloop holds a ticking bomb.',
     'Touch another Bloop to pass it on.',
     'When it explodes, the holder is out.',
     'Last Bloop standing wins.',
-  ], ['joystick', 'keys'], 3, 12, 90, { realtime: 'arena' }),
+  ], ['joystick', 'keys'], 3, 12, 60, { realtime: 'arena' }),
   g('survival-run', 'Survival Run', '🌋', 'Outrun the lava. Do not fall behind.', [
     'The lava wall chases you forward.',
     'Dodge boulders and squeeze through gaps.',
