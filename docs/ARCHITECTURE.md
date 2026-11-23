@@ -9,9 +9,9 @@ everything both sides must agree on.
  browser (React, Vite)                     server (Node 22)
  ┌───────────────────────┐   REST /api    ┌──────────────────────────────────────────┐
  │ screens  ── zustand ──┼───────────────►│ http: auth, profile, leaderboards, friends│
- │ game views (105)      │   Socket.IO    │ realtime: sockets, presence, rate limits  │
+ │ game views (111)      │   Socket.IO    │ realtime: sockets, presence, rate limits  │
  │ canvases, input, audio├◄──────────────►│ rooms: lifecycle, playlists, bots, match  │
- └───────────────────────┘  pub/priv/evt  │ engine: GameRunner + 105 game modules     │
+ └───────────────────────┘  pub/priv/evt  │ engine: GameRunner + 111 game modules     │
                                           │ progression: XP, achievements, records    │
                                           │ db: better-sqlite3                        │
                                           └──────────────────────────────────────────┘

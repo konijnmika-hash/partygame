@@ -1,12 +1,12 @@
 # Bloop Bash 🎉
 
-A colourful multiplayer party game for phones, tablets and PCs: **105 minigames** in 10 categories,
+A colourful multiplayer party game for phones, tablets and PCs: **111 minigames** in 10 categories,
 starring the Bloops, a cast of squishy original characters. Make a room, share the 4-letter code or
 link, and play chaotic rounds together. Everyone plays on their own device, and the server keeps
 the score.
 
-- **105 playable minigames**: drawing, reaction, social deduction, physics chaos, racing, memory,
-  puzzles, team games, weird & funny, and 13 original real-time arcade brawls.
+- **111 playable minigames**: drawing, reaction, social deduction, physics chaos, racing, memory,
+  puzzles, team games, weird & funny, and 19 real-time arcade brawls (battle royale, platform fighter, bomb mazes and more).
   The full list with rules is in [docs/GAMES.md](docs/GAMES.md).
 - **Real multiplayer**: rooms with codes, invite links and QR codes, quick-play matchmaking into
   public rooms, live presence, automatic reconnect (reload mid-game and you're back in), host
@@ -105,7 +105,7 @@ npm run test:e2e
 
 Builds the app, starts a throwaway server and drives real browsers with Playwright: a full UI
 session (desktop host + phone guest via the invite link, mid-game reload/reconnect, final podium,
-leaderboards) and a UI smoke test of a sample of games. Add `-- --all` to smoke-test all 105 games.
+leaderboards) and a UI smoke test of a sample of games. Add `-- --all` to smoke-test all 111 games.
 
 ```bash
 npm run typecheck

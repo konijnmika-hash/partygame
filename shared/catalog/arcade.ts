@@ -81,4 +81,40 @@ export const ARCADE = [
     'Dash into the crown holder to steal it.',
     'Most crown time wins.',
   ], ['joystick', 'keys'], 2, 12, 60, A),
+  g('storm-royale', 'Storm Royale', '🌀', 'Drop in, loot up, build, survive the storm.', [
+    'Everyone parachutes onto the island. Loot chests 🧰 to upgrade your blaster: grey, green, blue, purple, gold!',
+    'Hold FIRE to shoot where you are moving. Tap BUILD to throw up a wooden wall for cover.',
+    'The purple storm shrinks: stay inside the circle or it drains your health.',
+    'Last Bloop standing wins. Eliminations score extra.',
+  ], ['joystick', 'keys'], 2, 12, 95, A),
+  g('knockout-clash', 'Knockout Clash', '🥊', 'Rack up damage %. Launch rivals off the stage.', [
+    'Hit rivals to raise their damage %: the higher it is, the further they fly.',
+    'HIT to attack, hold up + HIT for an uppercut, run + HIT on the ground for a big smash.',
+    'JUMP (twice in the air) to get back to the stage when you are knocked off.',
+    'Fly past the screen edge and you lose a stock. Three stocks; last one standing wins.',
+  ], ['joystick', 'keys'], 2, 8, 100, { ...A, orientation: 'landscape' }),
+  g('pipe-panic', 'Pipe Panic', '🐢', 'Bonk the ledge, flip the critter, kick it away.', [
+    'Critters crawl out of the pipes and walk down the ledges.',
+    'Jump and bonk the ledge right under a critter to flip it on its back.',
+    'Run into a flipped critter to kick it away for points. Upright ones bump you!',
+    'Hit the POW block to flip every critter at once. Grab the coins too.',
+  ], ['joystick', 'keys'], 1, 8, 80, { ...A, orientation: 'landscape' }),
+  g('boom-blocks', 'Boom Blocks', '💣', 'Drop bombs, blast crates, trap your rivals.', [
+    'Drop a BOMB: it blasts in a cross after two seconds.',
+    'Blow up crates to find power-ups: 💣 more bombs, 🔥 bigger blasts, 👟 faster shoes.',
+    'Bombs set each other off. Do not stand in the flames!',
+    'Three hearts each. Last Bloop standing wins.',
+  ], ['joystick', 'keys'], 2, 8, 110, A),
+  g('dot-muncher', 'Dot Muncher', '🟡', 'Munch dots, dodge ghosts, eat them back.', [
+    'Steer through the maze and munch the dots.',
+    'Ghosts chase you: get caught and you lose points.',
+    'Eat a big power pellet and the ghosts turn blue... now YOU can eat them, and other Bloops too!',
+    'The maze refills when it is cleared. Most points wins.',
+  ], ['joystick', 'keys', 'swipe'], 1, 8, 80, A),
+  g('ricochet-tanks', 'Ricochet Tanks', '🛞', 'Bank shots off the walls. Mind your own bullets.', [
+    'Drive your toy tank with the stick; a small push turns the turret without driving.',
+    'FIRE shots that bounce off walls twice. Shots that collide cancel each other out.',
+    'Careful: a bounced shot can hit you too! Drop a MINE to guard a corridor.',
+    'Most kills wins. You respawn after every hit.',
+  ], ['joystick', 'keys'], 2, 8, 80, A),
 ];
