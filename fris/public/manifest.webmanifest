@@ -1,0 +1,17 @@
+{
+  "name": "Fris - voeding, water & training",
+  "short_name": "Fris",
+  "description": "Calorieën, macro's, water, stappen en een gymschema op maat.",
+  "lang": "nl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#edf3ea",
+  "theme_color": "#1d7a4c",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
