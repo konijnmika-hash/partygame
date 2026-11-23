@@ -1,0 +1,31 @@
+/* Mini Physics Race pedals */
+.pedals { position: absolute; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-between; padding: 12px 16px calc(12px + var(--safe-bottom)); pointer-events: none; z-index: 10; }
+.pedal { pointer-events: auto; width: 112px; height: 112px; border: none; border-radius: 26px; font-family: var(--font-display); font-weight: 700; font-size: 1.15rem; color: #fff; touch-action: none; user-select: none; -webkit-user-select: none; box-shadow: 0 7px 0 rgba(0, 0, 0, 0.3), 0 12px 22px rgba(0, 0, 0, 0.3); }
+.pedal.gas { background: radial-gradient(circle at 35% 30%, #7af0a8, #1fb562); }
+.pedal.brake { background: radial-gradient(circle at 35% 30%, #ff9ca2, #e8304a); width: 96px; height: 96px; }
+.pedal.down { transform: translateY(6px); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3); }
+@media (max-height: 520px) and (orientation: landscape) {
+  .pedal { width: 92px; height: 92px; }
+  .pedal.brake { width: 80px; height: 80px; }
+}
+
+/* Wobbly Tower */
+.wt-stage { position: relative; flex: 1; width: 100%; min-height: 0; display: flex; flex-direction: column; }
+.wt-turn { position: absolute; left: 50%; bottom: calc(14px + var(--safe-bottom)); transform: translateX(-50%); z-index: 6; display: flex; align-items: center; gap: 10px; padding: 8px 16px 8px 8px; border-radius: 999px; background: rgba(20, 8, 50, 0.72); font-weight: 900; white-space: nowrap; }
+.wt-turn.mine { background: linear-gradient(180deg, #ffd23f, #ffad1f); color: #3a2400; animation: pulse 1s ease infinite; }
+.wt-toast { position: absolute; left: 50%; top: 22%; transform: translate(-50%, -50%); z-index: 7; font-family: var(--font-display); font-weight: 700; font-size: clamp(1.6rem, 7vw, 2.6rem); text-shadow: 0 4px 0 rgba(0, 0, 0, 0.35); pointer-events: none; animation: zoom-boom 0.45s var(--ease-bounce); text-align: center; white-space: nowrap; }
+.wt-toast small { display: block; font-size: 0.5em; font-family: var(--font-body); font-weight: 900; }
+
+/* Physics Puzzle */
+.pz-wrap { position: relative; flex: 1; width: 100%; min-height: 0; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 6px 8px calc(8px + var(--safe-bottom)); }
+.pz-canvas-box { position: relative; flex: 1; min-height: 0; width: 100%; touch-action: none; }
+.pz-canvas-box canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.pz-bar { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 8px; width: min(820px, 100%); }
+.pz-bar .btn { padding: 10px 16px; }
+.pz-ramp-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 14px; border: none; background: #fff; color: var(--ink); font-weight: 900; box-shadow: 0 4px 0 rgba(0, 0, 0, 0.25); }
+.pz-ramp-btn.used { opacity: 0.45; }
+.pz-ramp-btn.sel { outline: 3px solid var(--yellow); }
+.pz-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: min(820px, 100%); flex-wrap: wrap; }
+.pz-status { font-weight: 900; }
+.pz-status.good { color: #7af0a8; }
+.pz-status.bad { color: #ff9ca2; }

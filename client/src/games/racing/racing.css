@@ -1,0 +1,8 @@
+/* Racing HUD bits */
+.rc-hud { position: absolute; top: 8px; left: 8px; right: 8px; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; pointer-events: none; z-index: 5; }
+.rc-hud > * { pointer-events: auto; }
+.rc-pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: rgba(20, 8, 50, 0.62); color: #fff; font-weight: 900; font-size: 0.95rem; white-space: nowrap; }
+.rc-pill.big { font-size: 1.2rem; padding: 8px 14px; }
+.rc-pill.gold { background: linear-gradient(180deg, #ffd23f, #ffad1f); color: #3a2400; }
+.rc-col { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+

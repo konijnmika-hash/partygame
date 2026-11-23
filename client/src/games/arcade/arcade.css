@@ -1,0 +1,5 @@
+/* Arcade originals */
+.turn-pads { position: absolute; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-between; padding: 12px 16px calc(12px + var(--safe-bottom)); pointer-events: none; z-index: 10; }
+.turn-pad { pointer-events: auto; width: 104px; height: 104px; border: none; border-radius: 28px; font-size: 2.4rem; color: #fff; background: rgba(255, 255, 255, 0.18); border: 3px solid rgba(255, 255, 255, 0.35); touch-action: none; user-select: none; -webkit-user-select: none; }
+.turn-pad:active { background: rgba(255, 255, 255, 0.32); }
+.ph-hud .rp-always .rank-pill { display: inline-flex; }

@@ -1,0 +1,12 @@
+# One-click hosting on Render (free plan). Note: on the free plan the SQLite data
+# (accounts, leaderboards) resets when the service redeploys or restarts.
+services:
+  - type: web
+    name: bloop-bash
+    runtime: docker
+    plan: free
+    branch: claude/loving-euler-ap4zhx
+    healthCheckPath: /api/health
+    envVars:
+      - key: TRUST_PROXY
+        value: "1"
