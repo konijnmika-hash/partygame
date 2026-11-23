@@ -37,7 +37,6 @@ export interface Choice {
   disabled?: boolean;
 }
 
-/** Big tappable answer buttons. Number keys 1-9 select. */
 /** Length of the longest word, used to shrink labels that would otherwise break mid-word. */
 function longestWord(s: string): number {
   let m = 1;
@@ -45,6 +44,7 @@ function longestWord(s: string): number {
   return m;
 }
 
+/** Big tappable answer buttons. Number keys 1-9 select. */
 export function ChoiceGrid({ choices, onPick, picked, correct, wrong, disabled, cols, keyboard = true, compact }: {
   choices: Choice[];
   onPick: (i: number) => void;
@@ -162,6 +162,19 @@ export function MiniScores({ players, scores, me, fmt = (v) => String(v), limit 
         );
       })}
     </div>
+  );
+}
+
+/** Compact "#2 of 5" pill for small screens where a full score list would cover the game. */
+export function RankPill({ scores, me, fmt = (v) => String(v) }: { scores: Record<string, number>; me: string; fmt?: (v: number) => string }) {
+  const rows = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+  const i = rows.findIndex(([id]) => id === me);
+  if (i < 0) return null;
+  const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '🏅';
+  return (
+    <span className="rank-pill">
+      {medal} #{i + 1}/{rows.length} · {fmt(rows[i][1])}
+    </span>
   );
 }
 

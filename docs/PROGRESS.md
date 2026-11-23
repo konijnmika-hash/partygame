@@ -18,7 +18,7 @@ Working checklist. Each minigame = server logic (`server/games/<category>/`) + c
 - [x] Memory (10/10)
 - [x] Social (10/10)
 - [x] Drawing (10/10)
-- [ ] Physics (0/10)
+- [x] Physics (10/10)
 - [ ] Racing (0/10)
 - [ ] Team (0/12)
 - [ ] Weird (0/10)

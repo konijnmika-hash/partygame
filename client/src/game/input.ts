@@ -2,6 +2,7 @@
 // all write into one input state. Realtime games read it every frame.
 import { useEffect, useRef } from 'react';
 import type { InputFrame } from '@shared/types';
+import { tilt } from './tilt';
 
 const keys = new Set<string>();
 export const virtual = { x: 0, y: 0, a: false, b: false, active: false };
@@ -69,6 +70,10 @@ export function readInput(): InputFrame {
   if (x !== 0 && y !== 0) {
     x *= Math.SQRT1_2;
     y *= Math.SQRT1_2;
+  }
+  if (tilt.active && x === 0 && y === 0) {
+    x = tilt.x;
+    y = tilt.y;
   }
   if (virtual.active || virtual.a || virtual.b) {
     if (virtual.active) {
