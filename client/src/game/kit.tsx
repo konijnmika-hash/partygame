@@ -379,3 +379,4 @@ export function useSwipe(onSwipe: (d: 'up' | 'down' | 'left' | 'right') => void,
     },
   };
 }
+export { useKeys } from './input';
