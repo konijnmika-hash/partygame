@@ -54,6 +54,7 @@ export function GhostCanvas<W, S>({ def, pub, priv, me, isPlayer, send, worldSiz
   const drawRef = useRef(draw);
   drawRef.current = draw;
   const tapRef = useRef(0);
+  const pressTick = useRef(-1);
   const mapRef = useRef(inputMap);
   mapRef.current = inputMap;
   const sizeRef = useRef(worldSize);
@@ -86,13 +87,14 @@ export function GhostCanvas<W, S>({ def, pub, priv, me, isPlayer, send, worldSiz
       const target = Math.max(0, Math.floor(elapsed / tickMs));
       if (sim) {
         let inp = quantize(readInput());
-        if (tapRef.current > 0) {
-          inp = [inp[0], inp[1], inp[2] | 1];
-          tapRef.current--;
-        }
+        if (nowP < tapRef.current) inp = [inp[0], inp[1], inp[2] | 1];
         if (mapRef.current) inp = mapRef.current(inp);
         if (elapsed >= 0 && sim.doneAt == null && !inputEq(inp, last)) {
-          const k = sim.tick;
+          // a very quick tap (high refresh screens) could press and release within one tick;
+          // the release would then overwrite the press. Push the release to the next tick.
+          const released = (last[2] & ~inp[2]) !== 0;
+          const k = released && pressTick.current === sim.tick ? sim.tick + 1 : sim.tick;
+          if ((inp[2] & ~last[2]) !== 0) pressTick.current = k;
           sim.applyInput(k, inp);
           send({ t: 'gi', k, i: inp });
           last = inp;
@@ -138,7 +140,8 @@ export function GhostCanvas<W, S>({ def, pub, priv, me, isPlayer, send, worldSiz
       onPointerDown={(e) => {
         if (!tapToA || !isPlayer) return;
         if ((e.target as HTMLElement).closest('.touch-controls')) return;
-        tapRef.current = 3;
+        // hold A for a few sim ticks so the tap always registers
+        tapRef.current = performance.now() + 90;
       }}
     >
       <canvas ref={ref} className="arena-canvas" />

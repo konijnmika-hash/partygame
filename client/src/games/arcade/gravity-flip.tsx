@@ -2,7 +2,7 @@ import './arcade.css';
 import { useRef } from 'react';
 import type { GameViewProps } from '../../game/types';
 import { GhostCanvas, lerp, type GhostPub } from '../../game/GhostCanvas';
-import { gflipDef, GF, type GFState, type GFWorld } from '@shared/ghosts/arcade';
+import { gflipDef, GF, spikeTeeth, type GFState, type GFWorld } from '@shared/ghosts/arcade';
 import { drawBloop, text } from '../../game/canvas';
 import { isTouchDevice } from '../../game/input';
 import { usePortrait } from '../../game/kit';
@@ -10,7 +10,7 @@ import { sfx, vibrate } from '../../audio/sfx';
 import type { Avatar } from '@shared/types';
 
 const H = 600;
-const SPIKE = 34;
+const SPIKE = GF.SPIKE;
 
 function bloopG(ctx: CanvasRenderingContext2D, x: number, y: number, g: number, avatar: Avatar | undefined, o: { me?: boolean; alpha?: number; mood?: 'shock' | 'happy' }) {
   ctx.save();
@@ -78,18 +78,18 @@ export default function GravityFlip({ pub, priv, me, isPlayer, send, player }: G
             const sx = sp.x - mx + GF.X;
             if (sx > VW + 10) break;
             if (sx + sp.w < -10) continue;
-            const n = Math.max(1, Math.round(sp.w / 24));
-            const tw = sp.w / n;
-            for (let k = 0; k < n; k++) {
+            for (const t of spikeTeeth(sp)) {
+              const a = t.x0 - sp.x + sx;
+              const b = t.x1 - sp.x + sx;
               ctx.beginPath();
               if (sp.top) {
-                ctx.moveTo(sx + k * tw, GF.CEIL);
-                ctx.lineTo(sx + k * tw + tw / 2, GF.CEIL + SPIKE);
-                ctx.lineTo(sx + (k + 1) * tw, GF.CEIL);
+                ctx.moveTo(a, GF.CEIL);
+                ctx.lineTo((a + b) / 2, GF.CEIL + SPIKE);
+                ctx.lineTo(b, GF.CEIL);
               } else {
-                ctx.moveTo(sx + k * tw, GF.FLOOR);
-                ctx.lineTo(sx + k * tw + tw / 2, GF.FLOOR - SPIKE);
-                ctx.lineTo(sx + (k + 1) * tw, GF.FLOOR);
+                ctx.moveTo(a, GF.FLOOR);
+                ctx.lineTo((a + b) / 2, GF.FLOOR - SPIKE);
+                ctx.lineTo(b, GF.FLOOR);
               }
               ctx.closePath();
               ctx.fill();

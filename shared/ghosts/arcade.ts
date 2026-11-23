@@ -19,6 +19,8 @@ const pressed = (i: GInput, p: GInput, bit = 1) => (i[2] & bit) !== 0 && (p[2] &
 /* ------------------------------------------------------------------ Hover Hop */
 
 export const HH = { HZ: 30, H: 600, R: 17, PW: 70, X: 220 } as const;
+/** collision radius vs pillars: the visible Bloop body (drawn at R + 2) is ~15 px tall and ~16 px wide from its centre */
+const HH_HIT = 13.5;
 
 export interface HHWorld { pillars: { x: number; gy: number; gap: number }[]; speed: number }
 /** stun: ticks left dazed after a crash; hover: grace ticks floating before gravity kicks in. */
@@ -74,13 +76,13 @@ export const hoverDef: GhostDef<HHWorld, HHState> = {
     const px = s.x + HH.X;
     for (let k = s.passed; k < w.pillars.length && !crash; k++) {
       const p = w.pillars[k];
-      if (p.x - HH.PW / 2 - HH.R > px) break;
-      if (p.x + HH.PW / 2 + HH.R < px) {
+      if (p.x - HH.PW / 2 - HH_HIT > px) break;
+      if (p.x + HH.PW / 2 + HH_HIT < px) {
         s.passed = k + 1;
         continue;
       }
       // the pillar is two solid blocks above and below the gap
-      if (circleRect(px, s.y, HH.R, p.x - HH.PW / 2, 0, p.x + HH.PW / 2, p.gy - p.gap / 2) || circleRect(px, s.y, HH.R, p.x - HH.PW / 2, p.gy + p.gap / 2, p.x + HH.PW / 2, HH.H)) crash = true;
+      if (circleRect(px, s.y, HH_HIT, p.x - HH.PW / 2, 0, p.x + HH.PW / 2, p.gy - p.gap / 2) || circleRect(px, s.y, HH_HIT, p.x - HH.PW / 2, p.gy + p.gap / 2, p.x + HH.PW / 2, HH.H)) crash = true;
     }
     if (crash) {
       s.crashes++;
@@ -115,7 +117,39 @@ export function hoverBot(w: HHWorld, s: HHState, _tick: number, skill: number, r
 
 /* ------------------------------------------------------------------ Gravity Flip */
 
-export const GF = { HZ: 30, FLOOR: 470, CEIL: 130, R: 22, X: 230 } as const;
+export const GF = { HZ: 30, FLOOR: 470, CEIL: 130, R: 22, X: 230, SPIKE: 34 } as const;
+/** collision radius vs spikes: a little smaller than the drawn body so near misses count as misses */
+const GF_HIT = 16;
+
+/** The individual teeth of a spike strip, exactly as they are drawn. */
+export function spikeTeeth(sp: { x: number; w: number }): { x0: number; x1: number }[] {
+  const n = Math.max(1, Math.round(sp.w / 24));
+  const tw = sp.w / n;
+  return Array.from({ length: n }, (_, k) => ({ x0: sp.x + k * tw, x1: sp.x + (k + 1) * tw }));
+}
+
+function segDist2(px: number, py: number, ax: number, ay: number, bx: number, by: number): number {
+  const vx = bx - ax;
+  const vy = by - ay;
+  const t = Math.max(0, Math.min(1, ((px - ax) * vx + (py - ay) * vy) / (vx * vx + vy * vy)));
+  const dx = px - (ax + vx * t);
+  const dy = py - (ay + vy * t);
+  return dx * dx + dy * dy;
+}
+
+/** circle vs one spike tooth (triangle with its base on the floor or ceiling) */
+function hitsTooth(cx: number, cy: number, r: number, x0: number, x1: number, top: number): boolean {
+  const base = top ? GF.CEIL : GF.FLOOR;
+  const tip = top ? GF.CEIL + GF.SPIKE : GF.FLOOR - GF.SPIKE;
+  const mx = (x0 + x1) / 2;
+  const r2 = r * r;
+  if (segDist2(cx, cy, x0, base, mx, tip) < r2 || segDist2(cx, cy, mx, tip, x1, base) < r2) return true;
+  // centre inside the triangle
+  const h = top ? cy - base : base - cy;
+  if (h < 0 || h > GF.SPIKE) return false;
+  const half = ((x1 - x0) / 2) * (1 - h / GF.SPIKE);
+  return Math.abs(cx - mx) <= half;
+}
 
 export interface GFWorld { spikes: { x: number; w: number; top: number }[]; v0: number; acc: number; vmax: number }
 /** stun: ticks frozen after touching spikes; inv: ticks of blinking invulnerability afterwards. */
@@ -176,10 +210,10 @@ export const gflipDef: GhostDef<GFWorld, GFState> = {
     for (const sp of w.spikes) {
       if (sp.x > px + GF.R) break;
       if (sp.x + sp.w < px - GF.R) continue;
-      // spikes are 34 px tall on their surface
-      const hitFloor = !sp.top && s.y + GF.R > GF.FLOOR - 34;
-      const hitCeil = sp.top && s.y - GF.R < GF.CEIL + 34;
-      if ((hitFloor || hitCeil) && !s.inv) {
+      // the visible body sits slightly toward the feet: shift the hit circle with gravity
+      const cy = s.y + s.g * 2;
+      const hit = spikeTeeth(sp).some((t) => t.x1 > px - GF_HIT && t.x0 < px + GF_HIT && hitsTooth(px, cy, GF_HIT, t.x0, t.x1, sp.top));
+      if (hit && !s.inv) {
         s.crashes++;
         s.stun = GF.HZ;
         break;
