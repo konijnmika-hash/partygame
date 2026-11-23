@@ -1,0 +1,73 @@
+/* Team minigames */
+.team-bar { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; width: min(820px, 100%); }
+.team-chip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; color: #fff; font-weight: 900; box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2); text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25); }
+.team-chip.mine { outline: 3px solid #fff; outline-offset: 2px; }
+.team-chip .team-score { font-family: var(--font-display); font-size: 1.15rem; min-width: 28px; text-align: right; }
+.team-faces { display: inline-flex; gap: 2px; }
+.team-tag { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 999px; color: #fff; font-weight: 900; font-size: 0.85rem; text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25); }
+
+/* tug of war */
+.tug-btn { width: min(78vw, 340px); height: min(32vh, 200px); border: none; border-radius: 32px; font-family: var(--font-display); font-weight: 700; font-size: 2.2rem; color: #fff; box-shadow: 0 10px 0 rgba(0, 0, 0, 0.28); touch-action: manipulation; user-select: none; -webkit-user-select: none; position: relative; overflow: hidden; }
+.tug-btn:active { transform: translateY(6px); box-shadow: 0 4px 0 rgba(0, 0, 0, 0.28); }
+.tug-beat { position: absolute; inset: 0; border-radius: inherit; pointer-events: none; }
+
+/* buzzer */
+.buzz-btn { width: min(70vw, 260px); aspect-ratio: 1; border-radius: 50%; border: none; color: #fff; font-family: var(--font-display); font-size: 2.4rem; font-weight: 700; background: radial-gradient(circle at 35% 30%, #ff8a8f, #e8304a); box-shadow: 0 12px 0 #a3152d, 0 18px 30px rgba(0, 0, 0, 0.35); }
+.buzz-btn:active:not(:disabled) { transform: translateY(8px); box-shadow: 0 4px 0 #a3152d; }
+.buzz-btn:disabled { filter: grayscale(0.7); opacity: 0.6; }
+
+/* team reaction */
+.tr-zone { flex: 1; width: 100%; min-height: 220px; border-radius: 28px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; font-family: var(--font-display); font-weight: 700; font-size: clamp(2rem, 9vw, 3.6rem); color: #fff; text-shadow: 0 4px 0 rgba(0, 0, 0, 0.25); user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+.tr-zone.wait { background: #3b2e6e; }
+.tr-zone.go { background: #1fb562; animation: pop-in 0.2s var(--ease-bounce); }
+.tr-zone.other { background: #5d4aa8; }
+.tr-zone small { font-size: 0.4em; font-family: var(--font-body); font-weight: 900; }
+
+/* grids (memory, construction, puzzle) */
+.tgrid { display: grid; gap: 4px; width: min(88vw, 420px, 44dvh); aspect-ratio: 1; padding: 6px; border-radius: 18px; background: rgba(0, 0, 0, 0.25); touch-action: manipulation; }
+.tgrid.small { width: min(40vw, 180px); gap: 2px; padding: 4px; border-radius: 12px; }
+.tcell { border: none; border-radius: 8px; background: rgba(255, 255, 255, 0.14); padding: 0; position: relative; }
+.tcell.on { background: var(--yellow); box-shadow: 0 0 12px rgba(255, 210, 63, 0.7); }
+.tcell.hit { background: var(--green); }
+.tcell.miss { background: var(--red); }
+.tcell.ghost { box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.6); }
+.tcell.ping { animation: pulse 0.7s ease infinite; box-shadow: inset 0 0 0 4px #fff; }
+.tcell.locked { box-shadow: inset 0 0 0 3px #7af0a8; }
+.tcell.sel { outline: 4px solid var(--yellow); outline-offset: -2px; z-index: 1; }
+.palette-row { display: flex; gap: 10px; justify-content: center; }
+.pal { width: 46px; height: 46px; border-radius: 14px; border: none; box-shadow: 0 4px 0 rgba(0, 0, 0, 0.25); }
+.pal.on { outline: 4px solid #fff; outline-offset: 2px; }
+.hint-row { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; width: min(560px, 100%); }
+.hint-btn { border: none; border-radius: 12px; padding: 6px 10px; font-weight: 900; background: #fff; color: var(--ink); font-size: 0.85rem; box-shadow: 0 3px 0 rgba(0, 0, 0, 0.2); }
+.hint-bubble { padding: 8px 14px; border-radius: 16px; background: #fff; color: var(--ink); font-weight: 900; animation: pop-in 0.25s var(--ease-bounce); }
+
+/* relay */
+.relay-track { display: flex; flex-direction: column; gap: 6px; width: min(640px, 100%); }
+.relay-row { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 14px; background: rgba(0, 0, 0, 0.22); }
+.relay-row.mine { box-shadow: inset 0 0 0 2px #fff; }
+.relay-legs { display: flex; gap: 4px; flex: 1; }
+.relay-legs i { flex: 1; height: 10px; border-radius: 5px; background: rgba(255, 255, 255, 0.2); }
+.relay-legs i.done { background: var(--yellow); }
+.relay-legs i.now { background: linear-gradient(90deg, var(--yellow) var(--p), rgba(255, 255, 255, 0.2) var(--p)); }
+.aim-box { position: relative; width: min(92vw, 520px); aspect-ratio: 4 / 3; border-radius: 22px; background: rgba(0, 0, 0, 0.25); touch-action: manipulation; }
+.aim-target { position: absolute; width: 64px; height: 64px; transform: translate(-50%, -50%); border-radius: 50%; border: none; background: radial-gradient(circle, #fff 0 18%, #ff4f5f 19% 42%, #fff 43% 62%, #ff4f5f 63%); box-shadow: 0 6px 0 rgba(0, 0, 0, 0.25); animation: pop-in 0.2s var(--ease-bounce); }
+.order-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: min(86vw, 360px); aspect-ratio: 1; }
+.order-cell { border: none; border-radius: 14px; background: rgba(255, 255, 255, 0.1); font-family: var(--font-display); font-size: 1.8rem; color: var(--ink); }
+.order-cell.num { background: #fff; box-shadow: 0 4px 0 rgba(0, 0, 0, 0.25); }
+.order-cell.used { background: var(--green); color: #fff; }
+
+/* team word */
+.clue-list { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.clue { padding: 8px 14px; border-radius: 14px; background: #fff; color: var(--ink); font-family: var(--font-display); font-size: 1.4rem; box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2); animation: pop-in 0.25s var(--ease-bounce); }
+.guess-feed { display: flex; flex-direction: column; gap: 4px; width: min(420px, 100%); max-height: 160px; overflow: auto; }
+.guess-feed div { padding: 4px 10px; border-radius: 10px; background: rgba(0, 0, 0, 0.2); font-weight: 800; }
+.guess-feed div.ok { background: var(--green); }
+.secret-word { font-family: var(--font-display); font-size: clamp(2rem, 10vw, 3.4rem); color: var(--yellow); text-shadow: 0 4px 0 rgba(0, 0, 0, 0.3); letter-spacing: 0.04em; }
+
+/* team drawing */
+.rate-card { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px; border-radius: 18px; background: rgba(0, 0, 0, 0.2); }
+.stars { display: flex; gap: 4px; }
+.star { border: none; background: none; font-size: 1.8rem; padding: 0 2px; filter: grayscale(1) opacity(0.45); }
+.star.on { filter: none; }
+.td-gallery { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; width: min(900px, 100%); }
+.td-gallery .gallery-item { width: min(42vw, 300px); }

@@ -128,7 +128,6 @@ export const wobblyTower = defineGame<S>({
       best: s.best,
       scores: s.scores,
       order: s.order,
-      now: ctx.now(),
     };
   },
   bot(s, ctx, pid) {

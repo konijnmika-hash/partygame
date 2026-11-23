@@ -7,5 +7,6 @@ import { SOCIAL_GAMES } from './social/index';
 import { DRAWING_GAMES } from './drawing/index';
 import { PHYSICS_GAMES } from './physics/index';
 import { RACING_GAMES } from './racing/index';
+import { TEAM_GAMES } from './team/index';
 
-export const GAME_DEFS: GameDef[] = [...REACTION_GAMES, ...PUZZLE_GAMES, ...MEMORY_GAMES, ...SOCIAL_GAMES, ...DRAWING_GAMES, ...PHYSICS_GAMES, ...RACING_GAMES];
+export const GAME_DEFS: GameDef[] = [...REACTION_GAMES, ...PUZZLE_GAMES, ...MEMORY_GAMES, ...SOCIAL_GAMES, ...DRAWING_GAMES, ...PHYSICS_GAMES, ...RACING_GAMES, ...TEAM_GAMES];

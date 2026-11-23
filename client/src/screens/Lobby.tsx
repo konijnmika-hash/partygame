@@ -11,15 +11,9 @@ import { SoundToggles } from '../components/TopBar';
 import { Chat, EmoteBar } from './RoomScreen';
 import { sfx } from '../audio/sfx';
 
-const TEAM_COLORS = ['#FF4F5F', '#3DA9FC', '#34CF78'];
-const TEAM_NAMES = ['Red', 'Blue', 'Green'];
+import { TEAM_COLORS, TEAM_NAMES, teamColor, teamName } from '@shared/teams';
 
-export function teamColor(t: number | null): string | undefined {
-  return t == null ? undefined : TEAM_COLORS[t % TEAM_COLORS.length];
-}
-export function teamName(t: number): string {
-  return TEAM_NAMES[t % TEAM_NAMES.length];
-}
+export { teamColor, teamName };
 
 async function patch(p: Partial<RoomSettings>) {
   const r = await emitAck('room:settings', p);
