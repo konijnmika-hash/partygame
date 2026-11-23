@@ -1,10 +1,10 @@
 import './arcade.css';
 import type { GameViewProps } from '../../game/types';
 import { ArenaCanvas } from '../../game/ArenaCanvas';
-import { drawBloop, emoji, roundRect, text } from '../../game/canvas';
+import { drawBloop, roundRect, text } from '../../game/canvas';
 import { TouchControls } from '../../game/Joystick';
 import { useInputStream } from '../../game/input';
-import { MiniScores, RankPill, SecondsLeft } from '../../game/kit';
+import { RankPill, SecondsLeft } from '../../game/kit';
 import { colorOf } from './_arcade';
 
 const PEN = 150;
@@ -14,6 +14,44 @@ const PENS = [
   { x: 1000 - PEN, y: 0 },
   { x: 0, y: 700 - PEN },
 ];
+
+/** A fluffy sheep that reads well on grass on every device (emoji rendering varies a lot). */
+function drawSheep(ctx: CanvasRenderingContext2D, x: number, y: number, id: number, t: number) {
+  const bob = Math.sin(t / 240 + id) * 1.4;
+  const dir = id % 2 ? 1 : -1;
+  ctx.fillStyle = 'rgba(0,0,0,0.16)';
+  ctx.beginPath();
+  ctx.ellipse(x, y + 14, 17, 5, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#3b3355';
+  for (const lx of [-9, -4, 4, 9]) ctx.fillRect(x + lx - 1.5, y + 4, 3, 10);
+  const puffs: [number, number, number][] = [[-9, -1, 8], [0, -6, 9], [9, -1, 8], [-5, 5, 8], [5, 5, 8]];
+  const blob = () => {
+    ctx.beginPath();
+    for (const [px, py, r] of puffs) {
+      ctx.moveTo(x + px + r, y + py + bob);
+      ctx.arc(x + px, y + py + bob, r, 0, Math.PI * 2);
+    }
+  };
+  ctx.strokeStyle = '#b8b0d6';
+  ctx.lineWidth = 4;
+  blob();
+  ctx.stroke();
+  ctx.fillStyle = '#fff';
+  blob();
+  ctx.fill();
+  ctx.fillStyle = '#3b3355';
+  ctx.beginPath();
+  ctx.ellipse(x + dir * 15, y - 3 + bob, 6.5, 7.5, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(x + dir * 11, y - 10 + bob, 4, 2.2, dir * 0.6, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();
+  ctx.arc(x + dir * 17, y - 5 + bob, 1.8, 0, Math.PI * 2);
+  ctx.fill();
+}
 
 interface Pub {
   endsAt: number;
@@ -51,7 +89,7 @@ export default function SheepHerder({ pub, pubT, me, isPlayer, input, players, p
             ctx.setLineDash([]);
             text(ctx, `${s.scores[p.id] ?? 0} 🐑`, pen.x + PEN / 2, pen.y + (pen.y ? 22 : PEN - 18), 22, '#fff');
           });
-          for (const sh of s.o) emoji(ctx, '🐑', sh.x, sh.y, 34, Math.sin(d.t / 300 + sh.id) * 0.08);
+          for (const sh of s.o) drawSheep(ctx, sh.x, sh.y, sh.id, d.t);
           for (const p of s.p) {
             const m = player(p.id);
             drawBloop(ctx, p.x, p.y, 26, m?.avatar, { name: m?.name, me: p.id === me });
@@ -63,8 +101,8 @@ export default function SheepHerder({ pub, pubT, me, isPlayer, input, players, p
         }}
       />
       <div className="ph-hud">
-        <MiniScores players={players} scores={pub.scores} me={me} limit={4} title="Sheep" />
-        <RankPill scores={pub.scores} me={me} fmt={(v) => `${v} 🐑`} />
+        {/* the pens already show everyone's count, so only your rank is shown here */}
+        <span className="rp-always"><RankPill scores={pub.scores} me={me} fmt={(v) => `${v} 🐑`} /></span>
         <SecondsLeft deadline={pub.endsAt} />
       </div>
       {isPlayer && <TouchControls />}
