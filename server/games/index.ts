@@ -9,5 +9,6 @@ import { PHYSICS_GAMES } from './physics/index';
 import { RACING_GAMES } from './racing/index';
 import { TEAM_GAMES } from './team/index';
 import { WEIRD_GAMES } from './weird/index';
+import { ARCADE_GAMES } from './arcade/index';
 
-export const GAME_DEFS: GameDef[] = [...REACTION_GAMES, ...PUZZLE_GAMES, ...MEMORY_GAMES, ...SOCIAL_GAMES, ...DRAWING_GAMES, ...PHYSICS_GAMES, ...RACING_GAMES, ...TEAM_GAMES, ...WEIRD_GAMES];
+export const GAME_DEFS: GameDef[] = [...REACTION_GAMES, ...PUZZLE_GAMES, ...MEMORY_GAMES, ...SOCIAL_GAMES, ...DRAWING_GAMES, ...PHYSICS_GAMES, ...RACING_GAMES, ...TEAM_GAMES, ...WEIRD_GAMES, ...ARCADE_GAMES];
