@@ -11,9 +11,10 @@ import { sprintDef } from '@shared/ghosts/sprint';
 import { climbDef } from '@shared/ghosts/climb';
 import { ropeDef } from '@shared/ghosts/rope';
 import { platformerDef } from '@shared/ghosts/platformer';
+import { hoverDef, gflipDef, hopperDef } from '@shared/ghosts/arcade';
 import { generateLevel, simulate, validRamp } from '@shared/physicsPuzzle';
 
-const DEFS: GhostDef<any, any>[] = [reflexMazeDef, ballBalanceDef, hillRaceDef, stackDef, sprintDef, climbDef, ropeDef, platformerDef];
+const DEFS: GhostDef<any, any>[] = [reflexMazeDef, ballBalanceDef, hillRaceDef, stackDef, sprintDef, climbDef, ropeDef, platformerDef, hoverDef, gflipDef, hopperDef];
 
 function randomInputs(seed: number, ticks: number): { k: number; i: GInput }[] {
   const rng = createRng(seed);

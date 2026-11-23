@@ -145,7 +145,8 @@ export const paddleRoyale = defineGame<S>({
       t0: s.t0,
       endsAt: s.endsAt,
       sides: s.sides.map((sd) => ({ ax: r1(sd.ax), ay: r1(sd.ay), bx: r1(sd.bx), by: r1(sd.by), o: sd.owner })),
-      pad: Object.fromEntries(ctx.ids.map((id) => [id, r1(s.pad[id])])),
+      // paddle offsets along each side as an id-keyed list so clients interpolate them smoothly
+      p: ctx.ids.map((id) => ({ id, x: r1(s.pad[id]) })),
       lives: s.lives,
       padLen: PR.PAD,
       o: s.balls.map((b) => ({ id: b.id, x: r1(b.x), y: r1(b.y), w: b.wait > 0 ? 1 : 0 })),

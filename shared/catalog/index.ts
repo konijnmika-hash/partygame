@@ -9,13 +9,10 @@ import { PUZZLE } from './puzzle';
 import { TEAM } from './team';
 import { WEIRD } from './weird';
 import { ARCADE } from './arcade';
-import { SKILL } from './skill';
-import { BRAIN } from './brain';
-import { MIND } from './mind';
 
 export const CATALOG: GameMeta[] = [
   ...DRAWING, ...REACTION, ...SOCIAL, ...PHYSICS, ...RACING, ...MEMORY, ...PUZZLE,
-  ...TEAM, ...WEIRD, ...ARCADE, ...SKILL, ...BRAIN, ...MIND,
+  ...TEAM, ...WEIRD, ...ARCADE,
 ];
 
 export const GAME_MAP: Record<string, GameMeta> = {};

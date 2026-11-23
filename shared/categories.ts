@@ -20,9 +20,6 @@ export const CATEGORIES: CategoryInfo[] = [
   { id: 'team', name: 'Team Up', emoji: '🤝', color: '#FF4D6D', gradient: ['#FF6F8A', '#E8365D'], blurb: 'Cooperate with your team, crush the other.' },
   { id: 'weird', name: 'Weird & Funny', emoji: '🤪', color: '#C04DFF', gradient: ['#D774FF', '#A53CF5'], blurb: 'Absurd, silly and gloriously strange.' },
   { id: 'arcade', name: 'Arcade Brawl', emoji: '👾', color: '#3F6BFF', gradient: ['#5B86FF', '#3250E6'], blurb: 'Original real-time arena mayhem.' },
-  { id: 'skill', name: 'Skill Shots', emoji: '🎯', color: '#FF8C2E', gradient: ['#FFA94D', '#F5761A'], blurb: 'Precision, timing and steady hands.' },
-  { id: 'brain', name: 'Brain Busters', emoji: '💡', color: '#14B8A6', gradient: ['#2DD4BF', '#0E9F8E'], blurb: 'Words, logic and lightning-fast thinking.' },
-  { id: 'mind', name: 'Mind Games', emoji: '🔮', color: '#E0479E', gradient: ['#F06AB5', '#C9307F'], blurb: 'Outsmart, predict and out-bluff the table.' },
 ];
 
 export const CATEGORY_MAP: Record<CategoryId, CategoryInfo> = Object.fromEntries(

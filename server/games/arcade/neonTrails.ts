@@ -11,7 +11,7 @@ const ROUND_MAX_MS = 45_000;
 const DX = [1, 0, -1, 0];
 const DY = [0, 1, 0, -1];
 
-interface Rider { x: number; y: number; dir: number; want: number; alive: boolean; pts: number[]; outAt: number; idx: number }
+interface Rider { x: number; y: number; dir: number; q: number[]; alive: boolean; pts: number[]; outAt: number; idx: number }
 
 interface S {
   round: number;
@@ -55,10 +55,12 @@ export const neonTrails = defineGame<S>({
     s.inputs[pid] = f;
     const rd = s.r[pid];
     if (!rd || !rd.alive) return;
-    // the stick's dominant axis picks a new heading (no U-turns)
+    // the stick's dominant axis picks a new heading (no U-turns). Up to two turns are buffered so
+    // a quick double-tap (e.g. a tight 180° hairpin) is never swallowed between two grid steps.
     if (Math.abs(f.x) < 0.4 && Math.abs(f.y) < 0.4) return;
     const d = Math.abs(f.x) >= Math.abs(f.y) ? (f.x > 0 ? 0 : 2) : f.y > 0 ? 1 : 3;
-    if (d !== (rd.dir + 2) % 4) rd.want = d;
+    const base = rd.q.length ? rd.q[rd.q.length - 1] : rd.dir;
+    if (d !== base && d !== (base + 2) % 4 && rd.q.length < 2) rd.q.push(d);
   },
   tick(s, ctx, dt) {
     const now = ctx.now();
@@ -99,7 +101,7 @@ export const neonTrails = defineGame<S>({
       rows: NT.ROWS,
       riders: ctx.ids.map((id) => {
         const rd = s.r[id];
-        return { id, pts: rd.pts, x: rd.x, y: rd.y, a: rd.alive ? 1 : 0, i: rd.idx };
+        return { id, pts: rd.pts, x: rd.x, y: rd.y, d: rd.q.length ? rd.q[rd.q.length - 1] : rd.dir, a: rd.alive ? 1 : 0, i: rd.idx };
       }),
       winner: s.phase === 'break' ? s.winner : null,
       scores: s.scores,
@@ -107,13 +109,14 @@ export const neonTrails = defineGame<S>({
   },
   bot(s, ctx, pid) {
     const rd = s.r[pid];
-    if (s.phase !== 'play' || !rd?.alive) return null;
+    // wait for a buffered turn to happen before deciding again
+    if (s.phase !== 'play' || !rd?.alive || rd.q.length) return null;
     const skill = ctx.diff(0.5, 0.75, 0.92);
     // choose the heading with the most open space ahead (small flood fill)
-    let best = rd.want;
+    let best = rd.dir;
     let bs = -Infinity;
     for (const turn of [0, 1, 3]) {
-      const d = (rd.want + turn) % 4;
+      const d = (rd.dir + turn) % 4;
       const nx = rd.x + DX[d];
       const ny = rd.y + DY[d];
       const room = free(s, nx, ny) ? space(s, nx, ny, 160) : -1;
@@ -177,7 +180,7 @@ function startRound(s: S, ctx: GameCtx) {
     const x = Math.round(NT.COLS / 2 + Math.cos(a) * NT.COLS * 0.32);
     const y = Math.round(NT.ROWS / 2 + Math.sin(a) * NT.ROWS * 0.32);
     const dir = Math.abs(Math.cos(a + Math.PI / 2)) > Math.abs(Math.sin(a + Math.PI / 2)) ? (Math.cos(a + Math.PI / 2) > 0 ? 0 : 2) : Math.sin(a + Math.PI / 2) > 0 ? 1 : 3;
-    s.r[id] = { x, y, dir, want: dir, alive: true, pts: [x, y], outAt: 0, idx: i + 1 };
+    s.r[id] = { x, y, dir, q: [], alive: true, pts: [x, y], outAt: 0, idx: i + 1 };
     s.grid[y * NT.COLS + x] = i + 1;
   });
   s.phase = 'count';
@@ -191,8 +194,9 @@ function stepAll(s: S, ctx: GameCtx) {
   const next: Record<string, number> = {};
   for (const id of alive) {
     const rd = s.r[id];
-    if (rd.want !== rd.dir) {
-      rd.dir = rd.want;
+    const turn = rd.q.shift();
+    if (turn != null && turn !== rd.dir) {
+      rd.dir = turn;
       rd.pts.push(rd.x, rd.y);
     }
     const nx = rd.x + DX[rd.dir];

@@ -47,8 +47,8 @@ export function evaluateAchievements(i: AchievementInput): string[] {
   add('quick-reflex', i.bestReactionMs != null && i.bestReactionMs < 200);
   add('artist', (i.catWins.drawing || 0) >= 1);
   add('survivor', cw(['physics', 'racing', 'arcade']) >= 5);
-  add('brainiac', cw(['puzzle', 'memory', 'brain']) >= 10);
-  add('social-star', cw(['social', 'mind']) >= 10);
+  add('brainiac', cw(['puzzle', 'memory']) >= 10);
+  add('social-star', cw(['social', 'weird']) >= 10);
   add('team-player', (i.catWins.team || 0) >= 10);
   add('level-10', i.level >= 10);
   add('level-25', i.level >= 25);

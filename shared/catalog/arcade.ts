@@ -66,14 +66,14 @@ export const ARCADE = [
   g('hover-hop', 'Hover Hop', '🐝', 'Tap to flap through the gaps.', [
     'Tap to flap upward; gravity pulls you down.',
     'Fly through the gaps between the pillars.',
-    'Touch a pillar and you are out.',
-    'Farthest flight wins.',
+    'Bonk a pillar and you are dazed for a moment, then try that gap again.',
+    'Most gaps cleared in 60 seconds wins.',
   ], ['tap', 'keys'], 2, 16, 60, { realtime: 'ghost', orientation: 'landscape' }),
   g('gravity-flip', 'Gravity Flip', '🙃', 'Tap to flip gravity. Dodge the spikes.', [
     'You run automatically.',
     'Tap to flip between the floor and the ceiling.',
-    'Avoid the spikes on both sides.',
-    'Farthest run wins.',
+    'Avoid the spikes on both sides: touching them freezes you for a second.',
+    'Farthest run in 60 seconds wins.',
   ], ['tap', 'keys'], 2, 16, 60, { realtime: 'ghost', orientation: 'landscape' }),
   g('crown-chase', 'Crown Chase', '👑', 'Grab the crown. Keep it away.', [
     'Grab the crown and hold on to it.',

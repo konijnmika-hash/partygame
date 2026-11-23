@@ -2,7 +2,7 @@
 
 export type CategoryId =
   | 'drawing' | 'reaction' | 'social' | 'physics' | 'racing' | 'memory'
-  | 'puzzle' | 'team' | 'weird' | 'arcade' | 'skill' | 'brain' | 'mind';
+  | 'puzzle' | 'team' | 'weird' | 'arcade';
 
 export type Control =
   | 'tap' | 'swipe' | 'drag' | 'draw' | 'type' | 'joystick' | 'keys' | 'vote' | 'mic' | 'hold' | 'tilt' | 'numpad';

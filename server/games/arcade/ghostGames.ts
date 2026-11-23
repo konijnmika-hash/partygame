@@ -5,26 +5,26 @@ import { hoverDef, hoverBot, gflipDef, gflipBot, hopperDef, hopperBot, type HHSt
 const r1 = (v: number) => Math.round(v * 10) / 10;
 
 export const hoverHop = ghostGame(hoverDef, {
-  pubPlayer: (s: HHState) => ({ x: r1(s.x), y: r1(s.y), p: s.passed, o: s.out ? 1 : 0 }),
+  pubPlayer: (s: HHState) => ({ x: r1(s.x), y: r1(s.y), p: s.passed, o: s.stun ? 1 : 0 }),
   score: (_w, s) => ({
     score: s.passed * 1000 + Math.round(s.x / 10),
     perf: Math.min(1, s.passed / 40),
-    highlight: `${s.passed} gap${s.passed === 1 ? '' : 's'} cleared · ${s.flaps} flaps`,
-    bonuses: !s.out ? [{ label: 'Never crashed', pts: 40 }] : [],
+    highlight: `${s.passed} gap${s.passed === 1 ? '' : 's'} cleared · ${s.crashes} bonk${s.crashes === 1 ? '' : 's'}`,
+    bonuses: s.crashes === 0 && s.passed > 0 ? [{ label: 'Never crashed', pts: 40 }] : [],
     record: { key: 'gaps', label: 'Most Hover Hop gaps', value: s.passed, better: 'higher', format: 'int' },
   }),
   bot: (w, s, tick, rnd, skill, prev) => hoverBot(w, s, tick, skill, rnd, prev),
 });
 
 export const gravityFlip = ghostGame(gflipDef, {
-  pubPlayer: (s: GFState) => ({ x: r1(s.x), y: r1(s.y), g: s.g, o: s.out ? 1 : 0 }),
+  pubPlayer: (s: GFState) => ({ x: r1(s.x), y: r1(s.y), g: s.g, o: s.stun ? 1 : 0 }),
   score: (_w, s) => {
     const m = Math.round(s.x / 50);
     return {
       score: m,
       perf: Math.min(1, m / 480),
-      highlight: `${m} m · ${s.flips} flips`,
-      bonuses: !s.out ? [{ label: 'Made it to the end', pts: 40 }] : [],
+      highlight: `${m} m · ${s.flips} flips · ${s.crashes} spike${s.crashes === 1 ? '' : 's'} hit`,
+      bonuses: s.crashes === 0 && m > 0 ? [{ label: 'Flawless run', pts: 40 }] : [],
       record: { key: 'dist', label: 'Longest Gravity Flip run', value: m, better: 'higher', format: 'int' },
     };
   },

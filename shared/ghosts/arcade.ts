@@ -21,7 +21,8 @@ const pressed = (i: GInput, p: GInput, bit = 1) => (i[2] & bit) !== 0 && (p[2] &
 export const HH = { HZ: 30, H: 600, R: 17, PW: 70, X: 220 } as const;
 
 export interface HHWorld { pillars: { x: number; gy: number; gap: number }[]; speed: number }
-export interface HHState { x: number; y: number; vy: number; passed: number; out: number; flaps: number }
+/** stun: ticks left dazed after a crash; hover: grace ticks floating before gravity kicks in. */
+export interface HHState { x: number; y: number; vy: number; passed: number; stun: number; hover: number; crashes: number; flaps: number }
 
 export const hoverDef: GhostDef<HHWorld, HHState> = {
   id: 'hover-hop',
@@ -41,25 +42,37 @@ export const hoverDef: GhostDef<HHWorld, HHState> = {
     return { pillars, speed: d === 'easy' ? 200 : d === 'hard' ? 240 : 222 };
   },
   init(): HHState {
-    return { x: 0, y: HH.H / 2, vy: 0, passed: 0, out: 0, flaps: 0 };
+    return { x: 0, y: HH.H / 2, vy: 0, passed: 0, stun: 0, hover: HH.HZ, crashes: 0, flaps: 0 };
   },
   step(w, s, input, prev, tick) {
-    if (s.out) return;
     const dt = 1 / HH.HZ;
+    if (s.stun > 0) {
+      // dazed: then respawn floating in front of the pillar that got us
+      if (--s.stun === 0) {
+        const p = w.pillars[Math.min(s.passed, w.pillars.length - 1)];
+        s.x = p.x - 260 - HH.X;
+        s.y = p.gy;
+        s.vy = 0;
+        s.hover = HH.HZ;
+      }
+      return;
+    }
     if (pressed(input, prev) || (input[1] < -3 && prev[1] >= -3)) {
       s.vy = -440;
       s.flaps++;
+      s.hover = 0;
     }
-    s.vy = Math.min(700, s.vy + 1500 * dt);
+    if (s.hover > 0) s.hover--;
+    else s.vy = Math.min(700, s.vy + 1500 * dt);
     s.y += s.vy * dt;
     s.x += (w.speed + Math.min(80, tick / 30)) * dt;
     if (s.y < HH.R) {
       s.y = HH.R;
       s.vy = 0;
     }
-    if (s.y > HH.H - HH.R) s.out = tick + 1;
+    let crash = s.y > HH.H - HH.R;
     const px = s.x + HH.X;
-    for (let k = s.passed; k < w.pillars.length; k++) {
+    for (let k = s.passed; k < w.pillars.length && !crash; k++) {
       const p = w.pillars[k];
       if (p.x - HH.PW / 2 - HH.R > px) break;
       if (p.x + HH.PW / 2 + HH.R < px) {
@@ -67,20 +80,26 @@ export const hoverDef: GhostDef<HHWorld, HHState> = {
         continue;
       }
       // the pillar is two solid blocks above and below the gap
-      if (circleRect(px, s.y, HH.R, p.x - HH.PW / 2, 0, p.x + HH.PW / 2, p.gy - p.gap / 2) || circleRect(px, s.y, HH.R, p.x - HH.PW / 2, p.gy + p.gap / 2, p.x + HH.PW / 2, HH.H)) s.out = tick + 1;
+      if (circleRect(px, s.y, HH.R, p.x - HH.PW / 2, 0, p.x + HH.PW / 2, p.gy - p.gap / 2) || circleRect(px, s.y, HH.R, p.x - HH.PW / 2, p.gy + p.gap / 2, p.x + HH.PW / 2, HH.H)) crash = true;
+    }
+    if (crash) {
+      s.crashes++;
+      s.stun = Math.round(HH.HZ * 1.5);
+      s.vy = 0;
+      s.y = Math.min(s.y, HH.H - HH.R);
     }
     s.y = r2(s.y);
     s.vy = r2(s.vy);
     s.x = r2(s.x);
   },
-  done(_w, s) {
-    return s.out > 0;
+  done() {
+    return false;
   },
 };
 
 export function hoverBot(w: HHWorld, s: HHState, _tick: number, skill: number, rnd: () => number, prev: GInput = [0, 0, 0]): GInput {
   // a flap needs a fresh press: release first if the button is still held
-  if (prev[2] & 1) return [0, 0, 0];
+  if (prev[2] & 1 || s.stun) return [0, 0, 0];
   const px = s.x + HH.X;
   const p = w.pillars.find((q) => q.x + HH.PW / 2 + HH.R >= px) ?? w.pillars[w.pillars.length - 1];
   const top = p.gy - p.gap / 2 + HH.R;
@@ -99,7 +118,8 @@ export function hoverBot(w: HHWorld, s: HHState, _tick: number, skill: number, r
 export const GF = { HZ: 30, FLOOR: 470, CEIL: 130, R: 22, X: 230 } as const;
 
 export interface GFWorld { spikes: { x: number; w: number; top: number }[]; v0: number; acc: number; vmax: number }
-export interface GFState { x: number; y: number; vy: number; g: number; grounded: number; out: number; flips: number }
+/** stun: ticks frozen after touching spikes; inv: ticks of blinking invulnerability afterwards. */
+export interface GFState { x: number; y: number; vy: number; g: number; grounded: number; stun: number; inv: number; crashes: number; flips: number }
 
 export const gflipDef: GhostDef<GFWorld, GFState> = {
   id: 'gravity-flip',
@@ -126,10 +146,14 @@ export const gflipDef: GhostDef<GFWorld, GFState> = {
     return { spikes, v0, acc, vmax };
   },
   init(): GFState {
-    return { x: 0, y: GF.FLOOR - GF.R, vy: 0, g: 1, grounded: 1, out: 0, flips: 0 };
+    return { x: 0, y: GF.FLOOR - GF.R, vy: 0, g: 1, grounded: 1, stun: 0, inv: 0, crashes: 0, flips: 0 };
   },
   step(w, s, input, prev, tick) {
-    if (s.out) return;
+    if (s.stun > 0) {
+      if (--s.stun === 0) s.inv = Math.round(GF.HZ * 0.8);
+      return;
+    }
+    if (s.inv > 0) s.inv--;
     const dt = 1 / GF.HZ;
     if ((pressed(input, prev) || (input[1] !== 0 && prev[1] === 0)) && s.grounded) {
       s.g = -s.g;
@@ -155,19 +179,23 @@ export const gflipDef: GhostDef<GFWorld, GFState> = {
       // spikes are 34 px tall on their surface
       const hitFloor = !sp.top && s.y + GF.R > GF.FLOOR - 34;
       const hitCeil = sp.top && s.y - GF.R < GF.CEIL + 34;
-      if (hitFloor || hitCeil) s.out = tick + 1;
+      if ((hitFloor || hitCeil) && !s.inv) {
+        s.crashes++;
+        s.stun = GF.HZ;
+        break;
+      }
     }
     s.x = r2(s.x);
     s.y = r2(s.y);
     s.vy = r2(s.vy);
   },
-  done(_w, s) {
-    return s.out > 0;
+  done() {
+    return false;
   },
 };
 
 export function gflipBot(w: GFWorld, s: GFState, tick: number, skill: number, rnd: () => number): GInput {
-  if (!s.grounded) return [0, 0, 0];
+  if (!s.grounded || s.stun) return [0, 0, 0];
   const v = Math.min(w.vmax, w.v0 + (w.acc * tick) / GF.HZ);
   const px = s.x + GF.X;
   const onTop = s.g < 0 ? 1 : 0;
