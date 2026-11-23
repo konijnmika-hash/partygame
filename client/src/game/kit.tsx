@@ -38,6 +38,13 @@ export interface Choice {
 }
 
 /** Big tappable answer buttons. Number keys 1-9 select. */
+/** Length of the longest word, used to shrink labels that would otherwise break mid-word. */
+function longestWord(s: string): number {
+  let m = 1;
+  for (const w of s.split(/\s+/)) m = Math.max(m, w.length);
+  return m;
+}
+
 export function ChoiceGrid({ choices, onPick, picked, correct, wrong, disabled, cols, keyboard = true, compact }: {
   choices: Choice[];
   onPick: (i: number) => void;
@@ -74,7 +81,7 @@ export function ChoiceGrid({ choices, onPick, picked, correct, wrong, disabled, 
             }}
           >
             <span className="choice-key">{i + 1}</span>
-            <span className="choice-label">{ch.label}</span>
+            <span className="choice-label" style={typeof ch.label === 'string' ? ({ ['--chars' as any]: longestWord(ch.label) } as any) : undefined}>{ch.label}</span>
             {ch.sub != null && <span className="choice-sub">{ch.sub}</span>}
           </button>
         );

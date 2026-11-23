@@ -4,5 +4,6 @@ import { REACTION_GAMES } from './reaction/index';
 import { PUZZLE_GAMES } from './puzzle/index';
 import { MEMORY_GAMES } from './memory/index';
 import { SOCIAL_GAMES } from './social/index';
+import { DRAWING_GAMES } from './drawing/index';
 
-export const GAME_DEFS: GameDef[] = [...REACTION_GAMES, ...PUZZLE_GAMES, ...MEMORY_GAMES, ...SOCIAL_GAMES];
+export const GAME_DEFS: GameDef[] = [...REACTION_GAMES, ...PUZZLE_GAMES, ...MEMORY_GAMES, ...SOCIAL_GAMES, ...DRAWING_GAMES];

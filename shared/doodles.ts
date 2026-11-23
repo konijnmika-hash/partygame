@@ -97,10 +97,10 @@ export function resample(strokes: Poly[], spacing = 18): number[] {
   return out;
 }
 
-function avgNearest(a: number[], b: number[], cap: number): number {
-  if (!a.length) return cap;
-  if (!b.length) return cap;
-  let total = 0;
+/** For each point of `a`, distance to the nearest point of `b` (capped). */
+function nearestDists(a: number[], b: number[], cap: number): number[] {
+  const out: number[] = [];
+  if (!a.length) return out;
   for (let i = 0; i < a.length; i += 2) {
     let best = cap * cap;
     for (let j = 0; j < b.length; j += 2) {
@@ -109,22 +109,38 @@ function avgNearest(a: number[], b: number[], cap: number): number {
       const d = dx * dx + dy * dy;
       if (d < best) best = d;
     }
-    total += Math.sqrt(best);
+    out.push(Math.sqrt(best));
   }
-  return total / (a.length / 2);
+  return out;
 }
 
+function inkLength(strokes: Poly[]): number {
+  let len = 0;
+  for (const p of strokes) for (let i = 2; i < p.length; i += 2) len += Math.sqrt((p[i] - p[i - 2]) ** 2 + (p[i + 1] - p[i - 1]) ** 2);
+  return len;
+}
+
+const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
+
 /**
- * Accuracy 0..1 of a drawing vs a target (positions matter). Combines coverage (target points
- * near the drawing) and precision (drawing points near the target), via symmetric chamfer distance.
+ * Accuracy 0..1 of a drawing vs a target (positions matter):
+ *  - coverage: share of the target outline that has ink within reach, plus average distance
+ *  - precision: how close the ink stays to the target outline
+ *  - scribble penalty: far more ink than the target needs is suspicious
  */
 export function drawingAccuracy(target: Poly[], drawing: Poly[]): number {
-  const t = resample(target, 20);
-  const d = resample(drawing, 20).slice(0, 3000);
-  if (d.length < 6) return 0;
-  const cap = 300;
-  const coverage = avgNearest(t, d, cap);
-  const precision = avgNearest(d, t, cap);
-  const dist = coverage * 0.6 + precision * 0.4;
-  return Math.max(0, Math.min(1, 1 - (dist - 12) / 160));
+  const t = resample(target, 18);
+  const d = resample(drawing, 18).slice(0, 4000);
+  if (d.length < 6 || !t.length) return 0;
+  const cap = 400;
+  const cov = nearestDists(t, d, cap);
+  const prec = nearestDists(d, t, cap);
+  const covFrac = cov.filter((x) => x <= 42).length / cov.length;
+  const covAvg = cov.reduce((a, b) => a + b, 0) / cov.length;
+  const precAvg = prec.reduce((a, b) => a + b, 0) / prec.length;
+  const covScore = clamp01(1 - (covAvg - 8) / 95);
+  const precScore = clamp01(1 - (precAvg - 8) / 95);
+  const ratio = inkLength(drawing) / Math.max(1, inkLength(target));
+  const inkPenalty = ratio > 1.6 ? clamp01(1 - (ratio - 1.6) / 1.4) : 1;
+  return clamp01((0.45 * covFrac + 0.25 * covScore + 0.3 * precScore) * inkPenalty);
 }

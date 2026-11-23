@@ -14,10 +14,10 @@ Working checklist. Each minigame = server logic (`server/games/<category>/`) + c
 
 ## Minigames
 - [x] Reaction (10/10)
-- [ ] Puzzle (0/10)
-- [ ] Memory (0/10)
-- [ ] Social (0/10)
-- [ ] Drawing (0/10)
+- [x] Puzzle (10/10)
+- [x] Memory (10/10)
+- [x] Social (10/10)
+- [x] Drawing (10/10)
 - [ ] Physics (0/10)
 - [ ] Racing (0/10)
 - [ ] Team (0/12)

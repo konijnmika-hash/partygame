@@ -11,16 +11,19 @@ export interface StrokeData {
   p: number[];
 }
 
-export function renderStrokes(ctx: CanvasRenderingContext2D, strokes: Iterable<StrokeData>, size: number, bg = '#ffffff'): void {
-  ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, size, size);
+export function renderStrokes(ctx: CanvasRenderingContext2D, strokes: Iterable<StrokeData>, size: number, bg: string | null = '#ffffff', guide?: StrokeData[] | null, colorOverride?: string): void {
+  if (bg) {
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, size, size);
+  }
+  if (guide?.length) renderStrokes(ctx, guide, size, null, null, '#cfc6f2');
   const k = size / 1000;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
   for (const s of strokes) {
     const p = s.p;
     if (p.length < 2) continue;
-    ctx.strokeStyle = PALETTE[s.c] ?? '#000';
+    ctx.strokeStyle = colorOverride ?? PALETTE[s.c] ?? '#000';
     ctx.lineWidth = Math.max(1, s.w * k);
     ctx.beginPath();
     ctx.moveTo(p[0] * k, p[1] * k);
@@ -49,7 +52,7 @@ function useCanvasSize(ref: React.RefObject<HTMLCanvasElement | null>) {
 }
 
 /** Read-only drawing (for galleries / reveals). */
-export function StrokesView({ strokes, className = '' }: { strokes: StrokeData[] | null | undefined; className?: string }) {
+export function StrokesView({ strokes, className = '', guide, overlayColor }: { strokes: StrokeData[] | null | undefined; className?: string; guide?: StrokeData[] | null; overlayColor?: string }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const size = useCanvasSize(ref);
   useEffect(() => {
@@ -60,12 +63,12 @@ export function StrokesView({ strokes, className = '' }: { strokes: StrokeData[]
     cv.height = size * dpr;
     const ctx = cv.getContext('2d')!;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    renderStrokes(ctx, strokes ?? [], size);
-  }, [strokes, size]);
+    renderStrokes(ctx, strokes ?? [], size, '#ffffff', guide, overlayColor);
+  }, [strokes, size, guide, overlayColor]);
   return <canvas ref={ref} className={`draw-canvas view ${className}`} />;
 }
 
-export function DrawCanvas({ cv, me, editable, blind = false, send, toolbar = true, limitColors, onStrokeEnd, maxStrokes, hideOthers = false, overlay }: {
+export function DrawCanvas({ cv, me, editable, blind = false, send, toolbar = true, limitColors, onStrokeEnd, onStrokeStart, maxStrokes, hideOthers = false, overlay, guide }: {
   cv: string;
   me: string;
   editable: boolean;
@@ -77,6 +80,8 @@ export function DrawCanvas({ cv, me, editable, blind = false, send, toolbar = tr
   maxStrokes?: number;
   hideOthers?: boolean;
   overlay?: React.ReactNode;
+  guide?: StrokeData[] | null;
+  onStrokeStart?: () => void;
 }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const strokes = useRef(new Map<string, StrokeData>());
@@ -93,6 +98,11 @@ export function DrawCanvas({ cv, me, editable, blind = false, send, toolbar = tr
   colorRef.current = color;
   const widthRef = useRef(width);
   widthRef.current = width;
+  const guideRef = useRef(guide);
+  if (guideRef.current !== guide) {
+    guideRef.current = guide;
+    dirty.current = true;
+  }
 
   useEffect(() => {
     strokes.current.clear();
@@ -137,7 +147,7 @@ export function DrawCanvas({ cv, me, editable, blind = false, send, toolbar = tr
           if (hideOthers && !mine) return false;
           return true;
         }).map(([, s]) => s);
-        renderStrokes(ctx, list, sz);
+        renderStrokes(ctx, list, sz, '#ffffff', guideRef.current);
       }
       raf = requestAnimationFrame(loop);
     };
@@ -148,6 +158,11 @@ export function DrawCanvas({ cv, me, editable, blind = false, send, toolbar = tr
   useEffect(() => {
     dirty.current = true;
   }, [size]);
+
+  // each time drawing is (re-)enabled, the per-turn stroke limit starts over
+  useEffect(() => {
+    if (editable) myCount.current = 0;
+  }, [editable]);
 
   const flush = () => {
     const c = cur.current;
@@ -174,6 +189,7 @@ export function DrawCanvas({ cv, me, editable, blind = false, send, toolbar = tr
     cur.current = { key, buf: [x, y], last: performance.now() };
     myCount.current++;
     dirty.current = true;
+    onStrokeStart?.();
     sfx('draw');
   };
   const move = (e: React.PointerEvent) => {
