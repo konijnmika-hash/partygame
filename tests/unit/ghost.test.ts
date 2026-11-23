@@ -7,9 +7,13 @@ import { reflexMazeDef } from '@shared/ghosts/reflexMaze';
 import { ballBalanceDef } from '@shared/ghosts/ballBalance';
 import { hillRaceDef } from '@shared/ghosts/hillRace';
 import { stackDef } from '@shared/ghosts/stack';
+import { sprintDef } from '@shared/ghosts/sprint';
+import { climbDef } from '@shared/ghosts/climb';
+import { ropeDef } from '@shared/ghosts/rope';
+import { platformerDef } from '@shared/ghosts/platformer';
 import { generateLevel, simulate, validRamp } from '@shared/physicsPuzzle';
 
-const DEFS: GhostDef<any, any>[] = [reflexMazeDef, ballBalanceDef, hillRaceDef, stackDef];
+const DEFS: GhostDef<any, any>[] = [reflexMazeDef, ballBalanceDef, hillRaceDef, stackDef, sprintDef, climbDef, ropeDef, platformerDef];
 
 function randomInputs(seed: number, ticks: number): { k: number; i: GInput }[] {
   const rng = createRng(seed);
