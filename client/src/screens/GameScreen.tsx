@@ -4,7 +4,7 @@ import { CATEGORY_MAP } from '@shared/categories';
 import type { InputFrame } from '@shared/types';
 import { useStore } from '../state/store';
 import { emit } from '../net/socket';
-import { getView } from '../game/registry';
+import { forgetView, getView, isChunkLoadError } from '../game/registry';
 import type { GameViewProps } from '../game/types';
 import { SoundToggles } from '../components/TopBar';
 import { CountUp, Spinner } from '../components/ui';
@@ -19,13 +19,35 @@ class GameErrorBoundary extends Component<{ children: ReactNode; gameId: string 
     console.error('game view crashed', err);
   }
   override render() {
-    if (this.state.err) {
+    const err = this.state.err;
+    if (err) {
+      // the game's code could not be downloaded: after a site update the old files are gone,
+      // so only a fresh page load helps (the room reconnects by itself)
+      const stale = isChunkLoadError(err);
       return (
         <div className="g-stage centered">
           <div className="glass center stack">
-            <h2>Oops! This game hiccuped 😵</h2>
-            <p className="muted small">Your progress is safe on the server. Try reloading the view.</p>
-            <button className="btn btn-pink" onClick={() => { this.setState({ err: null }); emit('game:sync'); }}>Reload game view</button>
+            <h2>{stale ? 'Could not load this game 📡' : 'Oops! This game hiccuped 😵'}</h2>
+            <p className="muted small">
+              {stale
+                ? 'The connection dropped or Bloop Bash was just updated. Reload the page to get the latest version.'
+                : 'Your progress is safe. Try reloading the view.'}
+            </p>
+            {stale ? (
+              <button className="btn btn-pink" onClick={() => window.location.reload()}>Reload page</button>
+            ) : (
+              <button
+                className="btn btn-pink"
+                onClick={() => {
+                  forgetView(this.props.gameId);
+                  this.setState({ err: null });
+                  emit('game:sync');
+                }}
+              >
+                Reload game view
+              </button>
+            )}
+            <p className="muted tiny">{this.props.gameId}: {String(err.message || err).slice(0, 140)}</p>
           </div>
         </div>
       );
@@ -88,7 +110,7 @@ export function GameScreen() {
       </header>
       {!isPlayer && <div className="spectate-banner">👀 Spectating — you will join from the next round</div>}
       <main className="game-main">
-        <GameErrorBoundary gameId={gameId}>
+        <GameErrorBoundary key={gameId} gameId={gameId}>
           <Suspense fallback={<div className="g-stage centered"><Spinner /></div>}>
             {View && game.gameId === gameId && game.pub != null ? <View {...props} /> : <div className="g-stage centered"><Spinner /></div>}
           </Suspense>
