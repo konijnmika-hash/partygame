@@ -12,6 +12,8 @@ export function useCoachCtx(date: string): CoachCtx | null {
   const profile = useStore((s) => s.profile);
   const days = useStore((s) => s.days);
   const weights = useStore((s) => s.weights);
+  const prefs = useStore((s) => s.recipePrefs);
+  const favorites = useStore((s) => s.favRecipes);
   const t = useTargets();
   const plan = usePlan();
   const day = useDay(date);
@@ -25,19 +27,19 @@ export function useCoachCtx(date: string): CoachCtx | null {
     if (!profile || !t) return null;
     const wd = weekday(date);
     return {
-      profile, t, day, days, date, today: dateKey(), hour, waterTarget, weights,
+      profile, t, day, days, date, today: dateKey(), hour, waterTarget, weights, prefs, favorites,
       workout: plan.find((p) => p.weekday === wd),
       nextWorkout: plan.find((p) => p.weekday > wd) ?? plan[0],
     };
-  }, [profile, t, day, days, date, hour, waterTarget, weights, plan]);
+  }, [profile, t, day, days, date, hour, waterTarget, weights, plan, prefs, favorites]);
 }
 
 export function useCoachAction() {
   const { open, startSession, date } = useUI();
   const plan = usePlan();
-  return (kind: CoachAction) => {
+  return (action: NonNullable<CoachMsg['action']>) => {
     const s = useStore.getState();
-    switch (kind) {
+    switch (action.kind as CoachAction) {
       case 'water': {
         const ml = (s.days[date]?.waterMl ?? 0) + s.glassMl;
         s.setWater(date, ml);
@@ -53,6 +55,7 @@ export function useCoachAction() {
       case 'steps': return open({ type: 'steps' });
       case 'weight': return open({ type: 'weight' });
       case 'activity': return open({ type: 'activity' });
+      case 'recipe': return action.ref ? open({ type: 'recipe', id: action.ref, meal: action.meal }) : useUI.getState().setTab('recepten');
     }
   };
 }
@@ -91,7 +94,7 @@ export function CoachCard({ date }: { date: string }) {
         <b>{msg.title}</b>
         <p>{msg.text}</p>
         <div className="row" style={{ gap: 8, flexWrap: 'wrap' }}>
-          {msg.action && <button className="btn sm" onClick={() => act(msg.action!.kind)}>{msg.action.label}</button>}
+          {msg.action && <button className="btn sm" onClick={() => act(msg.action!)}>{msg.action.label}</button>}
           <button className="btn sm ghost" onClick={() => open({ type: 'inbox' })}>Alle berichten</button>
         </div>
       </div>
@@ -113,7 +116,7 @@ export function InboxSheet() {
             <div className="tiny" style={{ color: TONE[m.tone].color, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{TONE[m.tone].label}</div>
             <b>{m.title}</b>
             <p className="small muted" style={{ margin: '4px 0 0' }}>{m.text}</p>
-            {m.action && <button className="btn sm" style={{ marginTop: 10 }} onClick={() => { act(m.action!.kind); if (m.action!.kind === 'water') close(); }}>{m.action.label}</button>}
+            {m.action && <button className="btn sm" style={{ marginTop: 10 }} onClick={() => { if (m.action!.kind !== 'recipe') close(); act(m.action!); }}>{m.action.label}</button>}
           </div>
         ))}
         {fired.length > 0 && <p className="tiny" style={{ margin: 0 }}>Vandaag {fired.length} {fired.length === 1 ? 'reminder' : 'reminders'} verstuurd.</p>}

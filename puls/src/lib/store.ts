@@ -2,6 +2,8 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { ALL_EQUIP } from '../data/exercises';
 import type { Food } from '../data/foods';
+import type { Recipe } from '../data/recipes';
+import { mergeShopping, portionText, recipeFood, type Prefs, type ShopItem } from './recipes';
 import { dateKey } from './date';
 import type { ActivityEntry, DayLog, FoodEntry, MealKey, Profile, WeightEntry } from './types';
 
@@ -67,6 +69,12 @@ interface State {
   fired: Record<string, string[]>;
   /** per dag: welke successen al gevierd zijn */
   cheered: Record<string, string[]>;
+  /** favoriete recepten */
+  favRecipes: string[];
+  /** hoe vaak je een recept hebt gelogd */
+  cooked: Record<string, number>;
+  shopping: ShopItem[];
+  recipePrefs: Prefs;
 
   setProfile: (p: Profile) => void;
   updateProfile: (p: Partial<Profile>) => void;
@@ -88,6 +96,12 @@ interface State {
   markFired: (date: string, id: string) => void;
   markCheered: (date: string, ids: string[]) => void;
   reset: () => void;
+  logRecipe: (date: string, meal: MealKey, r: Recipe, factor: number) => void;
+  toggleFavRecipe: (id: string) => void;
+  addToShopping: (r: Recipe, factor: number) => void;
+  toggleShop: (key: string) => void;
+  clearShopping: (onlyDone: boolean) => void;
+  setRecipePrefs: (p: Partial<Prefs>) => void;
 }
 
 const initial = {
@@ -104,6 +118,10 @@ const initial = {
   reminders: DEFAULT_REMINDERS,
   fired: {} as Record<string, string[]>,
   cheered: {} as Record<string, string[]>,
+  favRecipes: [] as string[],
+  cooked: {} as Record<string, number>,
+  shopping: [] as ShopItem[],
+  recipePrefs: { vega: false } as Prefs,
 };
 
 export const useStore = create<State>()(
@@ -184,14 +202,31 @@ export const useStore = create<State>()(
         markFired: (date, id) => set((s) => ({ fired: { [date]: [...(s.fired[date] ?? []), id] } })),
         markCheered: (date, ids) => set((s) => ({ cheered: { [date]: [...new Set([...(s.cheered[date] ?? []), ...ids])] } })),
         reset: () => set({ ...initial }),
+
+        logRecipe: (date, meal, r, factor) => {
+          const food = recipeFood(r);
+          const grams = Math.round(food.portions[0].g * factor);
+          const entry: FoodEntry = { id: uid(), food, grams, label: portionText(factor) };
+          updateDay(date, (d) => ({ ...d, meals: { ...d.meals, [meal]: [...d.meals[meal], entry] } }));
+          set((s) => ({
+            recent: [food, ...s.recent.filter((x) => x.id !== food.id)].slice(0, 30),
+            cooked: { ...s.cooked, [r.id]: (s.cooked[r.id] ?? 0) + 1 },
+          }));
+        },
+        toggleFavRecipe: (id) =>
+          set((s) => ({ favRecipes: s.favRecipes.includes(id) ? s.favRecipes.filter((f) => f !== id) : [...s.favRecipes, id] })),
+        addToShopping: (r, factor) => set((s) => ({ shopping: mergeShopping(s.shopping, r, factor) })),
+        toggleShop: (key) => set((s) => ({ shopping: s.shopping.map((i) => (i.key === key ? { ...i, done: !i.done } : i)) })),
+        clearShopping: (onlyDone) => set((s) => ({ shopping: onlyDone ? s.shopping.filter((i) => !i.done) : [] })),
+        setRecipePrefs: (p) => set((s) => ({ recipePrefs: { ...s.recipePrefs, ...p } })),
       };
     },
     {
       name: 'puls-v1',
-      version: 2,
+      version: 3,
       migrate: (persisted) => {
         const s = persisted as State;
-        return { ...s, profile: s.profile ? normalizeProfile(s.profile) : null, reminders: s.reminders ?? DEFAULT_REMINDERS, fired: s.fired ?? {}, cheered: s.cheered ?? {} } as State;
+        return { ...s, profile: s.profile ? normalizeProfile(s.profile) : null, reminders: s.reminders ?? DEFAULT_REMINDERS, fired: s.fired ?? {}, cheered: s.cheered ?? {}, favRecipes: s.favRecipes ?? [], cooked: s.cooked ?? {}, shopping: s.shopping ?? [], recipePrefs: s.recipePrefs ?? { vega: false } } as State;
       },
     },
   ),

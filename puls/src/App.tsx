@@ -6,6 +6,8 @@ import {
 } from './components/Sheets';
 import { I, Toast } from './components/ui';
 import { Celebrations, InboxSheet, useReminders } from './components/Coach';
+import { CookMode, RecipeSheet, ShoppingSheet } from './components/RecipeSheets';
+import { Recipes } from './screens/Recipes';
 import { dateKey } from './lib/date';
 import { useStore } from './lib/store';
 import { useUI, type Tab } from './lib/ui';
@@ -17,9 +19,9 @@ import { Training, WorkoutSession } from './screens/Training';
 
 const TABS: { id: Tab; label: string; icon: () => ReactElement }[] = [
   { id: 'vandaag', label: 'Vandaag', icon: I.today },
+  { id: 'recepten', label: 'Recepten', icon: I.book },
   { id: 'training', label: 'Training', icon: I.dumbbell },
   { id: 'voortgang', label: 'Voortgang', icon: I.chart },
-  { id: 'profiel', label: 'Profiel', icon: I.user },
 ];
 
 function SheetHost() {
@@ -39,6 +41,8 @@ function SheetHost() {
     case 'connect': return <ConnectSheet />;
     case 'exercise': return <ExerciseSheet id={sheet.id} slotKey={sheet.slotKey} />;
     case 'inbox': return <InboxSheet />;
+    case 'recipe': return <RecipeSheet key={sheet.id} id={sheet.id} meal={sheet.meal} />;
+    case 'shopping': return <ShoppingSheet />;
   }
 }
 
@@ -63,12 +67,13 @@ export function App() {
 }
 
 function Main() {
-  const { tab, setTab, open, session } = useUI();
+  const { tab, setTab, open, session, cook } = useUI();
   useReminders();
 
   return (
     <div className="app">
       {tab === 'vandaag' && <Today />}
+      {tab === 'recepten' && <Recipes />}
       {tab === 'training' && <Training />}
       {tab === 'voortgang' && <Progress />}
       {tab === 'profiel' && <ProfileScreen />}
@@ -82,6 +87,7 @@ function Main() {
       </nav>
 
       {session && <WorkoutSession id={session} />}
+      {cook && <CookMode key={cook.id} />}
       <SheetHost />
       <Celebrations />
       <Toast />

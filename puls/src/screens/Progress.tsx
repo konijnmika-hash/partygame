@@ -4,7 +4,7 @@ import { addDays, dateKey, DAY_SHORT, fmt, parseKey, weekday } from '../lib/date
 import { dayTotals, useTargets } from '../lib/hooks';
 import { emptyDay, useStore } from '../lib/store';
 import { useUI } from '../lib/ui';
-import { BarChart, I, LineChart } from '../components/ui';
+import { BarChart, I, LineChart, AvatarButton } from '../components/ui';
 
 export function Progress() {
   const profile = useStore((s) => s.profile)!;
@@ -47,6 +47,7 @@ export function Progress() {
             30 dagen {!premium && <span className="lock" style={{ width: 14, height: 14 }}><I.lock /></span>}
           </button>
         </div>
+        <AvatarButton />
       </header>
 
       <div className="tiles3">

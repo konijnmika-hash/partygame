@@ -124,6 +124,7 @@ export function QuickSheet() {
   const glass = useStore((s) => s.glassMl);
   const items = [
     { t: 'Eten toevoegen', s: 'Zoek in de database of scan', ico: <I.apple />, c: 'var(--brand)', go: () => open({ type: 'addFood', meal: mealForNow() }) },
+    { t: 'Recept loggen', s: 'Kies een gerecht, porties al op maat', ico: <I.book />, c: 'var(--carb)', go: () => { close(); useUI.getState().setTab('recepten'); } },
     { t: `Glas water (${glass} ml)`, s: 'Direct toevoegen', ico: <I.drop />, c: 'var(--water)', go: () => { const d = useStore.getState().days[date]; useStore.getState().setWater(date, (d?.waterMl ?? 0) + glass); toast(`+${glass} ml water`); close(); } },
     { t: 'Activiteit', s: 'Hardlopen, fietsen, padel…', ico: <I.flame />, c: 'var(--steps)', go: () => open({ type: 'activity' }) },
     { t: 'Stappen', s: 'Stappen van vandaag invullen', ico: <I.shoe />, c: 'var(--steps)', go: () => open({ type: 'steps' }) },

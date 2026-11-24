@@ -9,6 +9,15 @@ Jouw persoonlijke coach voor eten, trainen en energie: calorieën en macro's tel
 - **Coach**: elke dag berichten op maat (ochtendplan, “je loopt achter met water”, eiwittips, trainingsreminder, stappen, streaks), een felicitatie-animatie zodra je een doel haalt, en reminders (water, maaltijden, training op een zelfgekozen tijd, dagoverzicht om 21:00) als melding op je telefoon of in de app.
 - **Dagboek**: ontbijt, lunch, avondeten en snacks, met aanbevolen kcal per maaltijd, “zelfde als gisteren” en per dag terugbladeren.
 - **Voedingsdatabase**: 200+ Nederlandse basisproducten met porties (snee, plak, glas…), plus online zoeken in miljoenen merkproducten via [Open Food Facts](https://world.openfoodfacts.org). Ook: snel kcal toevoegen, eigen producten, favorieten, recent en een barcodescanner (camera, of cijfers intikken).
+- **Recepten** (eigen tab): 37 recepten voor ontbijt, lunch, avondeten en snacks, elk met een getekende foodfoto, ingrediënten, stappen en een tip. Calorieën en macro's worden uit de voedingsdatabase berekend.
+  - **Porties op maat**: elk recept wordt geschaald (½× tot 2×) naar jouw doel voor die maaltijd. Heb je vandaag al gegeten, dan verdeelt Puls wat je nog over hebt over de maaltijden die nog open staan.
+  - **Je coach raadt aan**: voorstellen voor de maaltijd die nu aan de beurt is, op basis van je resterende kcal en eiwit, met uitleg waarom het past. Recent gegeten recepten wisselt hij af.
+  - **Dagmenu**: één recept per maaltijd dat samen je calorie- en eiwitdoel haalt; schudden voor een ander menu en alles in één tik op je boodschappenlijst.
+  - **Kookmodus**: stap voor stap in grote letters, ingebouwde kookwekker met geluid en trilling, scherm blijft aan, en aan het eind meteen loggen.
+  - **Boodschappenlijst**: dezelfde producten worden opgeteld en per afdeling gesorteerd; afvinken en delen.
+  - Favorieten, vega-voorkeur (geldt ook voor alle voorstellen), filters (eiwitrijk, snel, meal prep, budget, zoet, comfortfood) en zoeken op ingrediënt. Recepten zijn ook te vinden in “Eten toevoegen”.
+  - Lege maaltijden op het dagscherm tonen een **idee van je coach**, en de coach stelt 's middags voor wat je vanavond kunt eten of welke snack je eiwittekort aanvult.
+  - Echte foto's: zet een foto in `public/recepten/` en vul `photo: 'recepten/<id>.jpg'` in bij het recept in `src/data/recipes.ts`; die gaat dan vóór de tekening.
 - **Water**: glas met golfanimatie en een seintje als je achterloopt op schema.
 - **Stappen**: handmatig invoeren; koppelscherm voor Health Connect / Apple Gezondheid (zie hieronder).
 - **Trainingsschema**: 1–2 dagen = full body; 3 dagen = push / pull / benen; 4 dagen = borst & triceps, rug & biceps, benen, schouders & armen; 5 dagen = één spiergroep per dag; 6 dagen = push/pull/benen 2×. Oefeningen worden gekozen op je apparatuur en ervaring (van machines en lichaamsgewicht voor starters tot halterstang-oefeningen voor gevorderden). Elke oefening heeft een **geanimeerd plaatje**, stapsgewijze uitleg en een tip. Je kunt een oefening **wisselen** of aangeven dat je hem **niet kunt doen**; dan kiest Puls een alternatief voor dezelfde spieren. Tijdens de training vink je sets af, houd je je gewichten bij en loopt er een rusttimer.
@@ -23,7 +32,7 @@ Jouw persoonlijke coach voor eten, trainen en energie: calorieën en macro's tel
 cd puls
 npm install
 npm run dev        # http://localhost:5173, open op je telefoon via het netwerkadres
-npm test           # rekenregels, database en schema-generator
+npm test           # rekenregels, database, schema-generator en recepten
 npm run build      # productiebuild in dist/
 npm run build:single  # alles in één HTML-bestand (dist-single/) om te delen
 ```

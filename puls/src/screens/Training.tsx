@@ -6,7 +6,7 @@ import { useStore } from '../lib/store';
 import { useUI } from '../lib/ui';
 import { EXPERIENCE, SPLIT_NAME, workoutKcal, type WorkoutDay } from '../lib/workout';
 import { Figure } from '../components/Figure';
-import { I, toast } from '../components/ui';
+import { I, toast, AvatarButton } from '../components/ui';
 
 export function Training() {
   const profile = useStore((s) => s.profile)!;
@@ -29,7 +29,10 @@ export function Training() {
     <div className="page">
       <header className="topbar">
         <h1 className="page-title">Training</h1>
-        <button className="btn sm ghost" onClick={() => open({ type: 'planEdit' })}>Aanpassen</button>
+        <div className="row" style={{ gap: 8 }}>
+          <button className="btn sm ghost" onClick={() => open({ type: 'planEdit' })}>Aanpassen</button>
+          <AvatarButton />
+        </div>
       </header>
 
       <div className="chips">

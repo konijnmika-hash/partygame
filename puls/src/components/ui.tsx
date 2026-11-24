@@ -1,5 +1,7 @@
 import { useEffect, useState, type InputHTMLAttributes, type ReactNode, type SVGProps } from 'react';
 import { create } from 'zustand';
+import { useStore } from '../lib/store';
+import { useUI } from '../lib/ui';
 
 /* ---------- Icons (24px stroke) ---------- */
 const S = (props: SVGProps<SVGSVGElement>) => (
@@ -36,6 +38,16 @@ export const I = {
   sunrise: () => <S><path d="M3 18h18M6 18a6 6 0 0112 0M12 4v3M4.9 9.9l1.4 1.4M19.1 9.9l-1.4 1.4" /></S>,
   sun: () => <S><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></S>,
   moon: () => <S><path d="M20 14.5A8 8 0 019.5 4 8 8 0 1020 14.5z" /></S>,
+  book: () => <S><path d="M4 5.5A2.5 2.5 0 016.5 3H20v15H6.5A2.5 2.5 0 004 20.5v-15z" /><path d="M4 20.5A2.5 2.5 0 016.5 23H20v-5M9 8h7M9 11.5h5" /></S>,
+  chef: () => <S><path d="M7 14.5V20h10v-5.5M7 14.5a4 4 0 01-.6-7.9A5 5 0 0112 3a5 5 0 015.6 3.6 4 4 0 01-.6 7.9H7zM7 17h10" /></S>,
+  cart: () => <S><path d="M3 4h2l2.2 10.5a1.5 1.5 0 001.5 1.2h8.6a1.5 1.5 0 001.4-1.1L20.5 8H6.2" /><circle cx="9.5" cy="19.5" r="1.5" /><circle cx="17" cy="19.5" r="1.5" /></S>,
+  clock: () => <S><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></S>,
+  users: () => <S><circle cx="9" cy="8" r="3.5" /><path d="M2.5 20c.8-3.5 3.4-5.5 6.5-5.5s5.7 2 6.5 5.5M16 4.8a3.5 3.5 0 010 6.4M18 14.8c1.8.8 3 2.6 3.5 5.2" /></S>,
+  play: () => <S><path d="M7 4.5v15l12-7.5-12-7.5z" fill="currentColor" /></S>,
+  pause: () => <S><path d="M8 5v14M16 5v14" strokeWidth={3} /></S>,
+  shuffle: () => <S><path d="M3 7h3.5c2 0 3.2 1 4.3 2.7l2.4 4.6c1 1.7 2.3 2.7 4.3 2.7H21M3 17h3.5c1.4 0 2.4-.5 3.2-1.4M14.3 8.4c.8-.9 1.8-1.4 3.2-1.4H21M18 4l3 3-3 3M18 14l3 3-3 3" /></S>,
+  share: () => <S><path d="M12 15V3M8 7l4-4 4 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" /></S>,
+  sparkle: () => <S><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8L19 16z" /></S>,
   apple: () => <S><path d="M12 7c-1.5-1-5-1.5-6.5 1.5S5 16 7 19c1.2 1.8 2.7 2 5 1 2.3 1 3.8.8 5-1 2-3 2.5-7.5 1.5-10.5S13.5 6 12 7z" /><path d="M12 7c0-2 1-3.5 3-4" /></S>,
 };
 
@@ -263,5 +275,15 @@ export function LineChart({ points, goal, height = 160 }: { points: { label: str
         {last.value.toLocaleString('nl-NL', { maximumFractionDigits: 1 })} kg
       </text>
     </svg>
+  );
+}
+
+/** Rond profielknopje rechtsboven op elke pagina. */
+export function AvatarButton() {
+  const name = useStore((s) => s.profile?.name);
+  return (
+    <button className="avatar" onClick={() => useUI.getState().setTab('profiel')} aria-label="Profiel en instellingen">
+      {(name || 'P').slice(0, 1).toUpperCase()}
+    </button>
   );
 }

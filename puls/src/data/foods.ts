@@ -24,7 +24,7 @@ export interface Food {
   id: string;
   name: string;
   brand?: string;
-  cat: FoodCategory | 'online' | 'eigen';
+  cat: FoodCategory | 'online' | 'eigen' | 'recept';
   /** per 100 g / 100 ml */
   kcal: number;
   p: number;
@@ -32,7 +32,7 @@ export interface Food {
   f: number;
   unit: 'g' | 'ml';
   portions: Portion[];
-  source: 'db' | 'off' | 'custom';
+  source: 'db' | 'off' | 'custom' | 'recipe';
 }
 
 export const CATEGORY_LABEL: Record<Food['cat'], string> = {
@@ -50,6 +50,7 @@ export const CATEGORY_LABEL: Record<Food['cat'], string> = {
   saus: 'Sauzen & oliën',
   online: 'Online database',
   eigen: 'Eigen product',
+  recept: 'Recept van Puls',
 };
 
 export const CATEGORY_EMOJI: Record<Food['cat'], string> = {
@@ -67,6 +68,7 @@ export const CATEGORY_EMOJI: Record<Food['cat'], string> = {
   saus: '🫒',
   online: '🔎',
   eigen: '✏️',
+  recept: '🍽️',
 };
 
 // [naam, categorie, kcal, eiwit, koolhydraten, vet, porties "label:gram|label:gram", eenheid?]
@@ -84,6 +86,7 @@ const ROWS: Row[] = [
   ['Wit bolletje', 'brood', 270, 9, 51, 3, 'bolletje:50'],
   ['Krentenbol', 'brood', 285, 7.5, 52, 4, 'stuk:60'],
   ['Croissant', 'brood', 410, 8, 45, 21, 'stuk:50'],
+  ['Volkoren wrap', 'brood', 290, 9, 46, 6.5, 'stuk:60'],
   ['Beschuit', 'brood', 400, 10, 76, 5.5, 'stuk:10'],
   ['Knäckebröd volkoren', 'brood', 350, 10, 62, 2, 'stuk:12'],
   ['Rijstwafel', 'brood', 385, 8, 81, 3, 'stuk:8'],
@@ -120,12 +123,14 @@ const ROWS: Row[] = [
   ['Boter', 'beleg', 740, 0.7, 0.6, 82, 'op brood:5'],
   ['Halvarine', 'beleg', 355, 0.2, 0.5, 39, 'op brood:5'],
   ['Avocado', 'beleg', 160, 2, 2, 15, 'halve:70|hele:140'],
+  ['Ahornsiroop', 'beleg', 260, 0, 67, 0, 'eetlepel:20'],
 
   // Zuivel & eieren
   ['Ei (gekookt)', 'zuivel', 140, 12.5, 0.5, 10, 'stuk:55'],
   ['Ei (gebakken)', 'zuivel', 190, 13, 0.5, 15, 'stuk:55'],
   ['Roerei', 'zuivel', 160, 11, 1.5, 12, 'portie (2 eieren):120'],
   ['Omelet', 'zuivel', 155, 11, 1, 12, 'portie (2 eieren):120'],
+  ['Ei (rauw)', 'zuivel', 143, 12.6, 0.7, 9.5, 'stuk:55'],
   ['Halfvolle melk', 'zuivel', 46, 3.5, 4.7, 1.5, 'glas:200|scheutje:30', 'ml'],
   ['Volle melk', 'zuivel', 63, 3.4, 4.6, 3.5, 'glas:200|scheutje:30', 'ml'],
   ['Magere melk', 'zuivel', 35, 3.5, 4.8, 0.1, 'glas:200', 'ml'],
@@ -154,6 +159,7 @@ const ROWS: Row[] = [
   ['Half-om-half gehakt (gebakken)', 'vlees', 270, 24, 0, 19, 'portie:100'],
   ['Kipgehakt (gebakken)', 'vlees', 170, 22, 0, 9, 'portie:100'],
   ['Biefstuk (gebakken)', 'vlees', 160, 28, 0, 5.5, 'stuk:125'],
+  ['Mager rundergehakt (gebakken)', 'vlees', 200, 28, 0, 10, 'portie:100'],
   ['Varkenshaas (gebakken)', 'vlees', 145, 27, 0, 4, 'portie:100'],
   ['Shoarmavlees', 'vlees', 200, 20, 3, 12, 'portie:125'],
   ['Bacon (gebakken)', 'vlees', 400, 30, 1, 31, 'plak:10'],
@@ -190,6 +196,8 @@ const ROWS: Row[] = [
   ['Pasta (droog)', 'granen', 355, 12.5, 71, 1.5, 'portie:80'],
   ['Volkoren pasta (gekookt)', 'granen', 140, 6, 26, 1.2, 'portie:200'],
   ['Couscous (bereid)', 'granen', 115, 4, 23, 0.3, 'portie:150'],
+  ['Rijstnoedels (gekookt)', 'granen', 110, 1.8, 25, 0.2, 'portie:200'],
+  ['Gnocchi', 'granen', 150, 4, 32, 0.4, 'portie:200'],
   ['Quinoa (gekookt)', 'granen', 120, 4.4, 21, 1.9, 'portie:150'],
   ['Bulgur (gekookt)', 'granen', 85, 3, 17, 0.2, 'portie:150'],
   ['Noedels (gekookt)', 'granen', 140, 4.5, 26, 2, 'portie:200'],
@@ -220,6 +228,12 @@ const ROWS: Row[] = [
   ['Sla', 'groente', 15, 1.2, 1.5, 0.2, 'portie:50'],
   ['Gemengde salade', 'groente', 20, 1.3, 2.5, 0.2, 'portie:100'],
   ['Wokgroenten', 'groente', 30, 1.8, 4, 0.3, 'portie:200'],
+  ['Tomatenblokjes (blik)', 'groente', 22, 1.2, 3.5, 0.2, 'blik:400'],
+  ['Rucola', 'groente', 25, 2.6, 2, 0.7, 'handje:20'],
+  ['Knoflook', 'groente', 150, 6, 30, 0.5, 'teentje:4'],
+  ['Lente-ui', 'groente', 32, 1.8, 6, 0.2, 'stengel:15'],
+  ['Paksoi', 'groente', 13, 1.5, 2, 0.2, 'struik:150'],
+  ['Pompoen', 'groente', 30, 1, 6, 0.1, 'portie:200'],
 
   // Fruit
   ['Appel', 'fruit', 52, 0.3, 12, 0.2, 'stuk:150'],
@@ -237,6 +251,8 @@ const ROWS: Row[] = [
   ['Watermeloen', 'fruit', 30, 0.6, 7, 0.2, 'part:200'],
   ['Dadels', 'fruit', 290, 2.5, 66, 0.4, 'stuk:8'],
   ['Rozijnen', 'fruit', 300, 3, 69, 0.5, 'handje:25'],
+  ['Bosvruchten (diepvries)', 'fruit', 45, 1, 8, 0.3, 'handje:75'],
+  ['Citroen', 'fruit', 30, 1, 9, 0.3, 'partje:10|halve:40'],
 
   // Snacks & noten
   ['Amandelen', 'snack', 600, 21, 7, 52, 'handje:25'],
@@ -244,6 +260,11 @@ const ROWS: Row[] = [
   ['Cashewnoten', 'snack', 580, 18, 27, 46, 'handje:25'],
   ["Pinda's (gezouten)", 'snack', 600, 26, 10, 49, 'handje:25'],
   ['Ongebrande gemengde noten', 'snack', 620, 20, 10, 54, 'handje:25'],
+  ['Chiazaad', 'snack', 450, 17, 8, 31, 'eetlepel:10'],
+  ['Sesamzaad', 'snack', 570, 18, 12, 50, 'theelepel:3'],
+  ['Pompoenpitten', 'snack', 560, 30, 11, 46, 'eetlepel:10'],
+  ['Kokosrasp', 'snack', 660, 6, 24, 62, 'eetlepel:5'],
+  ['Cacaopoeder', 'snack', 380, 20, 12, 21, 'theelepel:5'],
   ['Pure chocolade 70%', 'snack', 580, 8, 33, 43, 'stukje:10|reep:100'],
   ['Melkchocolade', 'snack', 540, 7, 56, 31, 'stukje:10|reep:45'],
   ['Chips naturel', 'snack', 540, 6, 52, 34, 'portie:30|zak:150'],
@@ -306,6 +327,11 @@ const ROWS: Row[] = [
   ['Satésaus', 'saus', 240, 7, 14, 17, 'portie:50'],
   ['Sojasaus', 'saus', 60, 8, 6, 0, 'eetlepel:15', 'ml'],
   ['Suiker', 'saus', 400, 0, 100, 0, 'theelepel:4|klontje:5'],
+  ['Kokosmelk light', 'saus', 75, 0.7, 2, 7, 'blik:400', 'ml'],
+  ['Kerriepasta', 'saus', 150, 2, 10, 11, 'eetlepel:15'],
+  ['Tomatenpuree', 'saus', 85, 4.5, 13, 0.5, 'eetlepel:15'],
+  ['Pastasaus (tomaat)', 'saus', 55, 1.5, 8, 1.5, 'pot:400'],
+  ['Balsamicoazijn', 'saus', 110, 0.5, 22, 0, 'eetlepel:15', 'ml'],
 ];
 
 const slug = (s: string) =>

@@ -1,13 +1,15 @@
-import type { ReactElement } from 'react';
+import { useMemo, type ReactElement } from 'react';
 import { mealRange, entryNutrients, stepsToKm, sumNutrients } from '../lib/calc';
 import { addDays, dateKey, dayTitle, fmt, greeting, liters, weekday } from '../lib/date';
-import { dayTotals, useDay, usePlan, useTargets, useWaterTarget } from '../lib/hooks';
+import { dayTotals, useDay, useMealRoom, usePlan, useTargets, useWaterTarget } from '../lib/hooks';
 import { useStore } from '../lib/store';
 import { useUI } from '../lib/ui';
 import { MEALS, type MealKey } from '../lib/types';
-import { Bar, I, Logo, Ring, toast } from '../components/ui';
+import { AvatarButton, Bar, I, Logo, Ring, toast } from '../components/ui';
 import { CoachCard, useCoachCtx } from '../components/Coach';
 import { coachFeed } from '../lib/coach';
+import { MealIdea } from '../components/RecipeSheets';
+import { recentlyEaten, suggest } from '../lib/recipes';
 
 const NONE: never[] = [];
 
@@ -42,9 +44,7 @@ export function Today() {
         </div>
         <div className="row" style={{ gap: 8 }}>
           <Bell />
-          <button className="avatar" onClick={() => useUI.getState().setTab('profiel')} aria-label="Profiel">
-            {(profile.name || 'P').slice(0, 1).toUpperCase()}
-          </button>
+          <AvatarButton />
         </div>
       </header>
 
@@ -287,6 +287,7 @@ function MealCard({ meal, date, kcal }: { meal: MealKey; date: string; kcal: num
   const meta = MEAL_META[meal];
   const Icon = meta.icon;
   const yesterday = useStore((s) => s.days[addDays(date, -1)]?.meals[meal]) ?? NONE;
+  const idea = useMealIdea(meal, date, entries.length === 0 && date >= dateKey());
 
   return (
     <div className="card meal">
@@ -315,6 +316,7 @@ function MealCard({ meal, date, kcal }: { meal: MealKey; date: string; kcal: num
           ))}
         </div>
       )}
+      {idea && <MealIdea meal={meal} recipe={idea.recipe} factor={idea.factor} kcal={idea.n.kcal} protein={idea.n.p} />}
       {entries.length === 0 && yesterday.length > 0 && (
         <button
           className="tag"
@@ -326,4 +328,16 @@ function MealCard({ meal, date, kcal }: { meal: MealKey; date: string; kcal: num
       )}
     </div>
   );
+}
+
+/** Het beste recept voor een lege maaltijd, afgestemd op wat je vandaag nog over hebt. */
+function useMealIdea(meal: MealKey, date: string, enabled: boolean) {
+  const room = useMealRoom(meal, date);
+  const prefs = useStore((s) => s.recipePrefs);
+  const favorites = useStore((s) => s.favRecipes);
+  const days = useStore((s) => s.days);
+  return useMemo(() => {
+    if (!enabled || !room) return null;
+    return suggest(meal, room, { prefs, favorites, recent: recentlyEaten(days, date), seed: date })[0] ?? null;
+  }, [enabled, room, meal, prefs, favorites, days, date]);
 }

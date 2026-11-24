@@ -19,7 +19,10 @@ export function ProfileScreen() {
   return (
     <div className="page">
       <header className="topbar">
-        <h1 className="page-title">Profiel</h1>
+        <div className="row" style={{ gap: 6 }}>
+          <button className="iconbtn" onClick={() => useUI.getState().setTab('vandaag')} aria-label="Terug naar vandaag"><I.left /></button>
+          <h1 className="page-title">Profiel</h1>
+        </div>
         {premium && <span className="tag gold">🌟 Premium</span>}
       </header>
 

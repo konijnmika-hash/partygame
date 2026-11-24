@@ -1,5 +1,5 @@
 // Eenvoudige offline-cache: app-bestanden uit cache, eerst netwerk voor de pagina zelf.
-const CACHE = 'puls-v1';
+const CACHE = 'puls-v2';
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(['./', './index.html', './manifest.webmanifest', './icon.svg'])));
   self.skipWaiting();

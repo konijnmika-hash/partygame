@@ -1,17 +1,18 @@
 import { addDays, fmt, greeting, liters } from './date';
 import { dayTotals } from './hooks';
-import type { DayLog, Profile, Targets, WeightEntry } from './types';
+import type { DayLog, MealKey, Profile, Targets, WeightEntry } from './types';
+import { recentlyEaten, roomFor, suggest, type Prefs } from './recipes';
 import type { WorkoutDay } from './workout';
 
 export type Tone = 'cheer' | 'nudge' | 'tip' | 'plan';
-export type CoachAction = 'water' | 'food' | 'train' | 'steps' | 'weight' | 'activity';
+export type CoachAction = 'water' | 'food' | 'train' | 'steps' | 'weight' | 'activity' | 'recipe';
 
 export interface CoachMsg {
   id: string;
   tone: Tone;
   title: string;
   text: string;
-  action?: { label: string; kind: CoachAction };
+  action?: { label: string; kind: CoachAction; ref?: string; meal?: MealKey };
   prio: number;
 }
 
@@ -27,6 +28,33 @@ export interface CoachCtx {
   workout?: WorkoutDay;
   nextWorkout?: WorkoutDay;
   weights: WeightEntry[];
+  /** voorkeuren voor receptvoorstellen */
+  prefs?: Prefs;
+  favorites?: string[];
+}
+
+const IDEA: Record<MealKey, { from: number; to: number; title: string; prio: number }> = {
+  ontbijt: { from: 6, to: 10, title: 'Zin in een goed ontbijt?', prio: 47 },
+  lunch: { from: 11, to: 14, title: 'Wat eet je als lunch?', prio: 52 },
+  diner: { from: 15, to: 20, title: 'Wat eet je vanavond?', prio: 64 },
+  snacks: { from: 99, to: 99, title: '', prio: 0 },
+};
+
+/** Een receptvoorstel voor de maaltijd die nu aan de beurt is. */
+function mealIdea(c: CoachCtx): CoachMsg | null {
+  const meal = (Object.keys(IDEA) as MealKey[]).find((m) => c.hour >= IDEA[m].from && c.hour <= IDEA[m].to);
+  if (!meal || c.day.meals[meal].length) return null;
+  const { eaten } = dayTotals(c.day);
+  const room = roomFor(meal, c.t, c.day, eaten);
+  const best = suggest(meal, room, { prefs: c.prefs ?? { vega: false }, favorites: c.favorites, recent: recentlyEaten(c.days, c.date), seed: c.date })[0];
+  if (!best) return null;
+  const left = Math.max(0, c.t.kcal - eaten.kcal);
+  const r = best.recipe;
+  return {
+    id: `idea-${meal}`, tone: 'tip', prio: IDEA[meal].prio, title: IDEA[meal].title,
+    text: `${eaten.kcal > 0 ? `Je hebt nog ${fmt(left)} kcal over. ` : ''}Wat dacht je van ${r.name.charAt(0).toLowerCase() + r.name.slice(1)}? ${fmt(best.n.kcal)} kcal en ${fmt(best.n.p)} g eiwit${best.factor !== 1 ? ' (portie al op maat)' : ''}, klaar in ${r.minutes} minuten.`,
+    action: { label: 'Bekijk recept', kind: 'recipe', ref: r.id, meal },
+  };
 }
 
 const TIPS = [
@@ -106,8 +134,17 @@ export function coachFeed(c: CoachCtx): CoachMsg[] {
   if (eaten.p >= t.p * 0.95) {
     out.push({ id: 'protein-done', tone: 'cheer', prio: 65, title: 'Eiwitdoel binnen!', text: `${fmt(eaten.p)} g eiwit: precies wat je spieren nodig hebben om te herstellen en te groeien.` });
   } else if (hour >= 14 && count > 0 && eaten.p < t.p * 0.5) {
-    out.push({ id: 'protein', tone: 'tip', prio: 55, title: `Nog ${fmt(t.p - eaten.p)} g eiwit te gaan`, text: 'Een bakje skyr (17 g), een kipfilet (36 g) of een portie linzen (14 g) helpt je richting je doel.', action: { label: 'Eten toevoegen', kind: 'food' } });
+    const snack = suggest('snacks', { kcal: 200, p: t.p - eaten.p }, { prefs: c.prefs ?? { vega: false }, seed: c.date }).sort((a, b) => b.n.p / b.n.kcal - a.n.p / a.n.kcal)[0];
+    out.push({
+      id: 'protein', tone: 'tip', prio: 55, title: `Nog ${fmt(t.p - eaten.p)} g eiwit te gaan`,
+      text: snack ? `Een snelle oplossing: ${snack.recipe.name.toLowerCase()} geeft je ${fmt(snack.n.p)} g eiwit voor maar ${fmt(snack.n.kcal)} kcal.` : 'Een bakje skyr (17 g), een kipfilet (36 g) of een portie linzen (14 g) helpt je richting je doel.',
+      action: snack ? { label: 'Bekijk snack', kind: 'recipe', ref: snack.recipe.id, meal: 'snacks' } : { label: 'Eten toevoegen', kind: 'food' },
+    });
   }
+
+  // Receptidee voor de volgende maaltijd
+  const idea = mealIdea(c);
+  if (idea) out.push(idea);
 
   // Calorieën
   if (eaten.kcal > budget * 1.1) {

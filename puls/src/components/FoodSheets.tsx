@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { CATEGORY_EMOJI, CATEGORY_LABEL, FOODS, searchFoods, type Food, type FoodCategory } from '../data/foods';
 import { fmt } from '../lib/date';
 import { lookupBarcode, searchOff } from '../lib/openfoodfacts';
+import { RECIPE_FOODS } from '../lib/recipes';
 import { newId, useStore } from '../lib/store';
 import { useUI } from '../lib/ui';
 import { MEALS, type FoodEntry, type MealKey } from '../lib/types';
@@ -47,7 +48,7 @@ function SearchView({ meal, onPick, onView }: { meal: MealKey; onPick: (f: Food)
   const custom = useStore((s) => s.customFoods);
   const premium = useStore((s) => s.premium);
   const open = useUI((s) => s.open);
-  const all = useMemo(() => [...custom, ...FOODS], [custom]);
+  const all = useMemo(() => [...custom, ...RECIPE_FOODS, ...FOODS], [custom]);
   const local = useMemo(() => searchFoods(q, all), [q, all]);
   const favs = useMemo(() => {
     const byId = new Map([...all, ...recent].map((f) => [f.id, f]));

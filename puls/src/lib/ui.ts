@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { dateKey } from './date';
 import type { MealKey } from './types';
 
-export type Tab = 'vandaag' | 'training' | 'voortgang' | 'profiel';
+export type Tab = 'vandaag' | 'recepten' | 'training' | 'voortgang' | 'profiel';
 
 export type SheetState =
   | { type: 'addFood'; meal: MealKey }
@@ -17,7 +17,9 @@ export type SheetState =
   | { type: 'goals' }
   | { type: 'connect' }
   | { type: 'exercise'; id: string; slotKey?: string }
-  | { type: 'inbox' };
+  | { type: 'inbox' }
+  | { type: 'recipe'; id: string; meal?: MealKey }
+  | { type: 'shopping' };
 
 interface UI {
   tab: Tab;
@@ -25,11 +27,14 @@ interface UI {
   sheet: SheetState | null;
   /** id van de trainingsdag die nu loopt */
   session: string | null;
+  /** recept in kookmodus */
+  cook: { id: string; servings: number; factor: number; meal: MealKey } | null;
   setTab: (t: Tab) => void;
   setDate: (d: string) => void;
   open: (s: SheetState) => void;
   close: () => void;
   startSession: (id: string | null) => void;
+  startCook: (c: UI['cook']) => void;
 }
 
 export const useUI = create<UI>((set) => ({
@@ -37,6 +42,7 @@ export const useUI = create<UI>((set) => ({
   date: dateKey(),
   sheet: null,
   session: null,
+  cook: null,
   setTab: (tab) => {
     set({ tab });
     window.scrollTo({ top: 0 });
@@ -45,6 +51,7 @@ export const useUI = create<UI>((set) => ({
   open: (sheet) => set({ sheet }),
   close: () => set({ sheet: null }),
   startSession: (session) => set({ session, sheet: null }),
+  startCook: (cook) => set({ cook, sheet: null }),
 }));
 
 export const mealForNow = (h = new Date().getHours()): MealKey =>
