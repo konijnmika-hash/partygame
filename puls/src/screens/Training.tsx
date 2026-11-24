@@ -133,11 +133,11 @@ function WorkoutList({ wd }: { wd: WorkoutDay }) {
           <div className="grow">
             <div style={{ fontWeight: 600 }}>{e.exercise.name}</div>
             <div className="small muted num">
-              {e.sets} × {e.reps} · rust {restLabel(e.restSec)}
+              {e.sets}×{e.reps} · {restLabel(e.restSec)} rust
               {lifts[e.exercise.id] ? ` · ${fmt(lifts[e.exercise.id], 1)} kg` : ''}
             </div>
           </div>
-          <span className="tag">{e.alternatives.length ? 'Uitleg · wissel' : 'Uitleg'}</span>
+          <span className="exrow-go" aria-hidden><I.right /></span>
         </button>
       ))}
       {wd.cardio && (
@@ -248,7 +248,7 @@ export function WorkoutSession({ id }: { id: string }) {
                 <button className="fig-thumb" onClick={() => open({ type: 'exercise', id: e.exercise.id, slotKey: e.slotKey })} aria-label={`Uitleg ${e.exercise.name}`} style={complete ? { outline: '2px solid var(--brand)' } : undefined}><Figure anim={e.exercise.anim} still /></button>
                 <button className="grow" style={{ textAlign: 'left' }} onClick={() => open({ type: 'exercise', id: e.exercise.id, slotKey: e.slotKey })}>
                   <div style={{ fontWeight: 700 }}>{e.exercise.name}</div>
-                  <div className="small muted num">{e.sets} × {e.reps} · rust {restLabel(e.restSec)}</div>
+                  <div className="small muted num">{e.sets}×{e.reps} · {restLabel(e.restSec)} rust</div>
                 </button>
                 {e.exercise.weighted && (
                   <label className="weight-in small muted">

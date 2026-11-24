@@ -6,7 +6,7 @@ import { AvatarButton, I, toast } from '../components/ui';
 import { dateKey, fmt } from '../lib/date';
 import { dayTotals, useMealRoom, useTargets } from '../lib/hooks';
 import {
-  dayMenu, mealTarget, portionFor, portionText, recentlyEaten, recipeNutrients, recipeTags, scaleN, suggest, TAG_LABEL, type RecipeTag,
+  dayMenu, portionFor, portionText, recentlyEaten, recipeNutrients, recipeTags, scaleN, suggest, TAG_LABEL, type RecipeTag,
 } from '../lib/recipes';
 import { useStore } from '../lib/store';
 import { MEALS, type MealKey } from '../lib/types';
@@ -113,11 +113,11 @@ export function Recipes() {
 
 /** Een kaart in het overzicht, met de portie die bij jou past. */
 export function RecipeCard({ recipe, meal }: { recipe: Recipe; meal?: MealKey }) {
-  const t = useTargets();
+  const room = useMealRoom(recipe.meal, dateKey());
   const fav = useStore((s) => s.favRecipes.includes(recipe.id));
   const cooked = useStore((s) => s.cooked[recipe.id] ?? 0);
   const open = useUI((s) => s.open);
-  const factor = t ? portionFor(recipe, mealTarget(recipe.meal, t.kcal)) : 1;
+  const factor = room ? portionFor(recipe, room.kcal) : 1;
   const n = scaleN(recipeNutrients(recipe), factor);
   return (
     <article className="rcard">
@@ -223,7 +223,7 @@ function DayMenuCard() {
         {MEALS.map((m) => {
           const s = menu.items[m];
           return (
-            <button key={m} className="item menu-item" onClick={() => open({ type: 'recipe', id: s.recipe.id, meal: m })}>
+            <button key={m} className="item menu-item" onClick={() => open({ type: 'recipe', id: s.recipe.id, meal: m, factor: s.factor })}>
               <div className="menu-thumb"><FoodArt recipe={s.recipe} /></div>
               <div className="grow">
                 <div className="s">{MEAL_META[m].label}{s.factor !== 1 ? ` · ${portionText(s.factor)}` : ''}</div>

@@ -160,7 +160,12 @@ export function Switch({ on, onChange, label }: { on: boolean; onChange: (v: boo
   return <button className={'switch' + (on ? ' on' : '')} role="switch" aria-checked={on} aria-label={label} onClick={() => onChange(!on)} />;
 }
 
-const parseNum = (t: string) => parseFloat(t.replace(',', '.'));
+/** Leest een getal zoals je het in Nederland typt: "72,5" of "10.000" (punt als duizendtal). */
+export const parseNum = (t: string) => {
+  const v = t.trim().replace(/\s/g, '');
+  if (/^\d{1,3}(\.\d{3})+(,\d+)?$/.test(v)) return parseFloat(v.replace(/\./g, '').replace(',', '.'));
+  return parseFloat(v.replace(',', '.'));
+};
 const showNum = (v: number) => (Number.isFinite(v) ? String(v).replace('.', ',') : '');
 
 /** Numeric input that accepts a Dutch decimal comma while typing. */

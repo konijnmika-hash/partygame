@@ -119,3 +119,15 @@ describe('recipes', () => {
     expect(idea?.action?.ref).toBeTruthy();
   });
 });
+
+describe('number input', async () => {
+  const { parseNum } = await import('../src/components/ui');
+  it('reads Dutch numbers', () => {
+    expect(parseNum('72,5')).toBe(72.5);
+    expect(parseNum('72.5')).toBe(72.5);
+    expect(parseNum('10.000')).toBe(10000);
+    expect(parseNum('1.234.567')).toBe(1234567);
+    expect(parseNum('2.500,5')).toBe(2500.5);
+    expect(Number.isNaN(parseNum(''))).toBe(true);
+  });
+});

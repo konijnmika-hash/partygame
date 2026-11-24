@@ -16,19 +16,20 @@ import { I, Sheet, toast } from './ui';
 
 /* ---------- Recept ---------- */
 
-export function RecipeSheet({ id, meal: mealProp }: { id: string; meal?: MealKey }) {
+export function RecipeSheet({ id, meal: mealProp, planned }: { id: string; meal?: MealKey; planned?: number }) {
   const recipe = RECIPE_BY_ID.get(id);
   const { close, date, startCook, setTab, setDate } = useUI();
   const t = useTargets();
   const today = dateKey();
-  // loggen gaat naar de dag die open staat, behalve als dat in het verleden ligt én je vanuit recepten komt
-  const logDate = date < today && useUI.getState().tab === 'recepten' ? today : date;
+  // vanaf het dagscherm log je op de dag die openstaat, vanuit Recepten altijd op vandaag
+  const [logDate] = useState(() => (useUI.getState().tab === 'vandaag' ? date : today));
   const [meal, setMeal] = useState<MealKey>(mealProp ?? recipe?.meal ?? 'lunch');
   const room = useMealRoom(meal, logDate);
   const day = useStore((s) => s.days[logDate]);
   const fav = useStore((s) => s.favRecipes.includes(id));
   const cooked = useStore((s) => s.cooked[id] ?? 0);
-  const advised = recipe && room ? portionFor(recipe, room.kcal) : 1;
+  const fromMenu = planned !== undefined && meal === (mealProp ?? recipe?.meal);
+  const advised = fromMenu ? planned : recipe && room ? portionFor(recipe, room.kcal) : 1;
   const [factor, setFactor] = useState(advised);
   const [servings, setServings] = useState(1);
   const [have, setHave] = useState<string[]>([]);
@@ -101,7 +102,7 @@ export function RecipeSheet({ id, meal: mealProp }: { id: string; meal?: MealKey
             </div>
             <p className="portion-why">
               {factor === advised
-                ? <><b>Afgestemd op jou.</b> {room?.adjusted ? `Op basis van wat je vandaag al at, houd ik voor ${MEAL_META[meal].label.toLowerCase()} ${fmt(Math.round((room.kcal) / 10) * 10)} kcal aan.` : `Voor ${MEAL_META[meal].label.toLowerCase()} past ${fmt(lo)}–${fmt(hi)} kcal bij jouw doel.`}{factor !== 1 ? ` Daarom raad ik ${portionText(factor)} aan.` : ''}</>
+                ? <><b>Afgestemd op jou.</b> {fromMenu ? 'Met deze portie haalt je dagmenu precies je doelen van vandaag.' : room?.adjusted ? `Op basis van wat je vandaag al at, houd ik voor ${MEAL_META[meal].label.toLowerCase()} ${fmt(Math.round((room.kcal) / 10) * 10)} kcal aan.` : `Voor ${MEAL_META[meal].label.toLowerCase()} past ${fmt(lo)}–${fmt(hi)} kcal bij jouw doel.`}{factor !== 1 && !fromMenu ? ` Daarom raad ik ${portionText(factor)} aan.` : ''}</>
                 : <>Ik raadde {portionText(advised)} aan ({fmt(recipeNutrients(recipe).kcal * advised)} kcal). <button className="link" onClick={() => setF(advised)}>Terug naar advies</button></>}
               {logDate === today && <> Na deze maaltijd heb je vandaag nog <b className="num">{after >= 0 ? `${fmt(after)} kcal` : `${fmt(-after)} kcal te veel`}</b>{after >= 0 ? ' over' : ''}.</>}
             </p>
@@ -162,12 +163,13 @@ export function RecipeSheet({ id, meal: mealProp }: { id: string; meal?: MealKey
       </div>
 
       <div className="recipe-foot">
+        <div className="foot-lbl">Log bij</div>
         <div className="chips scroll" style={{ marginBottom: 10 }} role="radiogroup" aria-label="Log bij maaltijd">
           {MEALS.map((m) => <button key={m} role="radio" aria-checked={m === meal} className={'chip sm' + (m === meal ? ' on' : '')} onClick={() => setMeal(m)}>{MEAL_META[m].label}</button>)}
         </div>
         <div className="row" style={{ gap: 8 }}>
-          <button className="btn ghost" onClick={() => startCook({ id, servings, factor, meal })} aria-label="Kookmodus starten"><span className="i20"><I.chef /></span> Koken</button>
-          <button className="btn grow" onClick={log}>Log bij {MEAL_META[meal].label.toLowerCase()} · <span className="num">{fmt(n.kcal)} kcal</span></button>
+          <button className="btn ghost cook-btn" onClick={() => startCook({ id, servings, factor, meal })} aria-label="Kookmodus starten"><span className="i20"><I.chef /></span> Koken</button>
+          <button className="btn grow" onClick={log} aria-label={`Log bij ${MEAL_META[meal].label.toLowerCase()}, ${fmt(n.kcal)} kcal`}>Loggen <span className="btn-sub num">{fmt(n.kcal)} kcal</span></button>
         </div>
       </div>
     </Sheet>
@@ -204,6 +206,18 @@ export function CookMode() {
   const [showIng, setShowIng] = useState(false);
   const [timer, setTimer] = useState<{ end: number; left: number; running: boolean } | null>(null);
   const [, tick] = useState(0);
+
+  // achtergrond niet laten meescrollen en Escape sluit de kookmodus
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && useUI.getState().startCook(null);
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener('keydown', onKey);
+    };
+  }, []);
 
   // scherm aan houden tijdens het koken
   useEffect(() => {
@@ -412,7 +426,7 @@ export function MealIdea({ recipe, factor, kcal, protein, meal }: { recipe: Reci
       <div className="grow" style={{ minWidth: 0 }}>
         <div className="meal-idea-eyebrow"><span className="i14"><I.sparkle /></span> Idee van je coach</div>
         <div className="meal-idea-name ellipsis">{recipe.name}</div>
-        <div className="tiny num ellipsis">{fmt(kcal)} kcal · {fmt(protein)} g eiwit · {recipe.minutes} min{factor !== 1 ? ` · ${portionText(factor)}` : ''}</div>
+        <div className="tiny num ellipsis">{fmt(kcal)} kcal · {fmt(protein)} g eiwit{factor !== 1 ? ` · ${portionText(factor)}` : ` · ${recipe.minutes} min`}</div>
       </div>
       <I.right />
     </button>

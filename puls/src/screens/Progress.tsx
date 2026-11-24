@@ -41,14 +41,17 @@ export function Progress() {
     <div className="page">
       <header className="topbar">
         <h1 className="page-title">Voortgang</h1>
+        <AvatarButton />
+      </header>
+      <div className="row between" style={{ marginTop: -6 }}>
+        <span className="small muted">Jouw trends</span>
         <div className="seg" role="tablist" aria-label="Periode">
           <button className={range === 7 ? 'on' : ''} onClick={() => setRange(7)}>7 dagen</button>
           <button className={range === 30 ? 'on' : ''} onClick={() => (premium ? setRange(30) : open({ type: 'premium', reason: 'Bekijk je voortgang over 30 dagen met Premium.' }))}>
             30 dagen {!premium && <span className="lock" style={{ width: 14, height: 14 }}><I.lock /></span>}
           </button>
         </div>
-        <AvatarButton />
-      </header>
+      </div>
 
       <div className="tiles3">
         <div className="tile"><div className="v num">{streak}🔥</div><div className="l">dagen op rij</div></div>

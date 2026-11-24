@@ -26,13 +26,17 @@ export function ProfileScreen() {
         {premium && <span className="tag gold">🌟 Premium</span>}
       </header>
 
-      <section className="card row">
-        <div className="avatar" style={{ width: 60, height: 60, fontSize: 26 }}>{(profile.name || 'P').slice(0, 1).toUpperCase()}</div>
+      <section className="card row" style={{ alignItems: 'flex-start' }}>
+        <div className="avatar" style={{ width: 56, height: 56, fontSize: 24, flex: 'none' }}>{(profile.name || 'P').slice(0, 1).toUpperCase()}</div>
         <div className="grow">
           <h2 style={{ fontSize: 22 }}>{profile.name || 'Jij'}</h2>
-          <div className="small muted num">{profile.age} jaar · {profile.heightCm} cm · {fmt(profile.weightKg, 1)} kg · BMI {fmt(bmi(profile.weightKg, profile.heightCm), 1)}</div>
-          <div className="small muted">{goal.em} {goal.t} · {ACTIVITY[profile.activity].label}</div>
-          <div className="small muted num">Vet ± {fmt(bodyFat(profile))}% · vetvrije massa ± {fmt(leanMass(profile))} kg</div>
+          <div className="small muted num">{profile.age} jaar · {profile.heightCm} cm · {fmt(profile.weightKg, 1)} kg</div>
+          <div className="small muted">{goal.em} {goal.t} · {ACTIVITY[profile.activity].label.toLowerCase()}</div>
+          <div className="profile-stats num">
+            <span>BMI <b>{fmt(bmi(profile.weightKg, profile.heightCm), 1)}</b></span>
+            <span>Vet <b>± {fmt(bodyFat(profile))}%</b></span>
+            <span>Vetvrij <b>{fmt(leanMass(profile))} kg</b></span>
+          </div>
         </div>
         <button className="iconbtn" onClick={() => open({ type: 'profileEdit' })} aria-label="Gegevens bewerken"><I.pencil /></button>
       </section>

@@ -30,7 +30,7 @@ function Big({ id, value, onChange, unit, step, decimals = 0 }: { id: string; va
   return (
     <>
       <div className="bignum">
-        <NumField id={id} className="num" value={value} onValue={onChange} aria-label={unit} />
+        <NumField id={id} className="num" value={value} onValue={onChange} aria-label={unit} style={{ width: `${Math.max(2, String(value).length) * 0.62 + 0.2}em` }} />
         <span>{unit}</span>
       </div>
       <div className="nudge">
@@ -227,9 +227,9 @@ export function Onboarding() {
     case 'dagen':
       content = (
         <Q title="Hoeveel dagen wil je trainen?" lead="Kies een aantal en tik eventueel andere dagen aan.">
-          <div className="chips" style={{ justifyContent: 'space-between' }}>
+          <div className="week">
             {[0, 1, 2, 3, 4, 5, 6].map((n) => (
-              <button key={n} className={'chip' + (p.trainDays.length === n ? ' on' : '')} style={{ width: 44, justifyContent: 'center', padding: 0 }} onClick={() => set('trainDays', spreadDays(n))}>{n}×</button>
+              <button key={n} className={'chip' + (p.trainDays.length === n ? ' on' : '')} style={{ justifyContent: 'center', padding: 0 }} onClick={() => set('trainDays', spreadDays(n))}>{n}×</button>
             ))}
           </div>
           <div className="week">
@@ -319,10 +319,12 @@ export function Onboarding() {
                 ['evening', 'Dagoverzicht', 'Om 21:00 hoe je dag ging'],
               ] as [keyof Reminders, string, string][]).map(([k, t, s]) => (
                 <div key={k} className="item">
-                  <div className="grow"><div className="t">{t}</div><div className="s">{s}</div></div>
-                  {k === 'training' && rem.training && (
-                    <input id="ob-traintime" type="time" className="input" style={{ width: 118, height: 40 }} value={rem.trainingTime} onChange={(e) => setRem({ ...rem, trainingTime: e.target.value })} aria-label="Tijdstip trainingsreminder" />
-                  )}
+                  <div className="grow">
+                    <div className="t">{t}</div><div className="s">{s}</div>
+                    {k === 'training' && rem.training && (
+                      <input id="ob-traintime" type="time" className="input timein" value={rem.trainingTime} onChange={(e) => setRem({ ...rem, trainingTime: e.target.value })} aria-label="Tijdstip trainingsreminder" />
+                    )}
+                  </div>
                   <Switch on={rem[k] as boolean} onChange={(v) => setRem({ ...rem, [k]: v })} label={t} />
                 </div>
               ))}
@@ -373,15 +375,17 @@ export function Onboarding() {
       </div>
       <div key={step} style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>{content}</div>
       {!autoAdvance && step === 'coach' && (
-        <div className="stack tight" style={{ marginTop: 20 }}>
+        <div className="stack tight ob-foot">
           <button className="btn block" onClick={async () => { await requestNotifications(); setRem((r) => ({ ...r, on: true })); next(); }}>Ja, help me herinneren</button>
           <button className="btn ghost block" onClick={() => { setRem((r) => ({ ...r, on: false })); next(); }}>Liever niet</button>
         </div>
       )}
       {!autoAdvance && step !== 'coach' && (
-        <button className="btn block" style={{ marginTop: 20 }} disabled={!valid} onClick={() => (step === 'plan' ? finish() : next())}>
-          {step === 'plan' ? 'Aan de slag' : step === 'naam' && !p.name.trim() ? 'Overslaan' : 'Volgende'}
-        </button>
+        <div className="ob-foot">
+          <button className="btn block" disabled={!valid} onClick={() => (step === 'plan' ? finish() : next())}>
+            {step === 'plan' ? 'Aan de slag' : step === 'naam' && !p.name.trim() ? 'Overslaan' : 'Volgende'}
+          </button>
+        </div>
       )}
     </div>
   );

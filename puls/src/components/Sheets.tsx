@@ -79,12 +79,11 @@ export function ActivitySheet() {
   return (
     <Sheet onClose={close} title="Activiteit">
       <div className="stack">
-        <div className="grid2" style={{ gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+        <div className="act-grid" role="radiogroup" aria-label="Soort activiteit">
           {ACTIVITIES.map((a) => (
-            <button key={a.id} className={'card flat'} onClick={() => setAct(a)}
-              style={{ padding: '10px 4px', borderRadius: 16, textAlign: 'center', borderColor: a.id === act.id ? 'var(--brand)' : undefined, borderWidth: a.id === act.id ? 2 : 1 }}>
-              <div style={{ fontSize: 24 }}>{a.emoji}</div>
-              <div className="tiny" style={{ color: 'var(--ink)', fontWeight: 600 }}>{a.name}</div>
+            <button key={a.id} role="radio" aria-checked={a.id === act.id} className={'act' + (a.id === act.id ? ' on' : '')} onClick={() => setAct(a)}>
+              <span className="act-em">{a.emoji}</span>
+              <span className="act-name">{a.name}</span>
             </button>
           ))}
         </div>
@@ -411,8 +410,10 @@ export function ReminderRows() {
       </div>
       {r.on && rows.map(([k, t, s]) => (
         <div key={k} className="item">
-          <div className="grow"><div className="t">{t}</div><div className="s">{s}</div></div>
-          {k === 'training' && r.training && <input id="rem-time" type="time" className="input" style={{ width: 118, height: 40 }} value={r.trainingTime} onChange={(e) => set({ trainingTime: e.target.value })} aria-label="Tijdstip trainingsreminder" />}
+          <div className="grow">
+            <div className="t">{t}</div><div className="s">{s}</div>
+            {k === 'training' && r.training && <input id="rem-time" type="time" className="input timein" value={r.trainingTime} onChange={(e) => set({ trainingTime: e.target.value })} aria-label="Tijdstip trainingsreminder" />}
+          </div>
           <Switch on={r[k] as boolean} onChange={(v) => set({ [k]: v })} label={t} />
         </div>
       ))}

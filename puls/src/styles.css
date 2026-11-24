@@ -286,11 +286,12 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; letter-spacing: -0.02e
 .empty .em { font-size: 34px; }
 
 .toast {
-  position: fixed; left: 50%; bottom: calc(var(--tabbar-h) + 18px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
-  background: var(--ink); color: var(--bg); padding: 12px 18px; border-radius: 16px; font-weight: 600; z-index: 80;
-  box-shadow: var(--shadow); animation: toast 0.3s ease both; max-width: calc(100% - 32px); width: max-content; text-align: center;
+  position: fixed; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 12px); transform: translateX(-50%);
+  background: var(--ink); color: var(--bg); padding: 11px 16px; border-radius: 16px; font-weight: 600; font-size: 14px; line-height: 1.35; z-index: 95;
+  box-shadow: 0 10px 30px -8px rgb(0 0 0 / 0.35); animation: toast 0.3s cubic-bezier(.2,.9,.25,1) both; max-width: min(440px, calc(100% - 32px)); width: max-content; text-align: center;
+  pointer-events: none;
 }
-@keyframes toast { from { opacity: 0; transform: translate(-50%, 12px); } }
+@keyframes toast { from { opacity: 0; transform: translate(-50%, -14px); } }
 
 /* Training */
 .week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
@@ -334,7 +335,7 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; letter-spacing: -0.02e
 .weight-in input { width: 74px; height: 38px; border-radius: 11px; border: 1.5px solid var(--line); background: var(--surface); text-align: center; font-weight: 700; }
 
 /* Onboarding */
-.ob { min-height: 100dvh; max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; padding: calc(env(safe-area-inset-top, 0px) + 12px) max(20px, env(safe-area-inset-right, 0px)) calc(20px + env(safe-area-inset-bottom, 0px)) max(20px, env(safe-area-inset-left, 0px)); }
+.ob { min-height: 100dvh; max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; padding: calc(env(safe-area-inset-top, 0px) + 12px) max(20px, env(safe-area-inset-right, 0px)) 0 max(20px, env(safe-area-inset-left, 0px)); }
 .ob-top { display: flex; align-items: center; gap: 12px; height: 48px; }
 .ob-progress { flex: 1; height: 6px; background: var(--surface-2); border-radius: 9px; overflow: hidden; }
 .ob-progress i { display: block; height: 100%; background: var(--brand); border-radius: inherit; transition: width 0.35s ease; }
@@ -347,7 +348,7 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; letter-spacing: -0.02e
 .choice .s { color: var(--ink-2); font-size: 13.5px; }
 .choice.on { border-color: var(--brand); background: color-mix(in srgb, var(--brand) 7%, var(--surface)); }
 .bignum { display: flex; align-items: baseline; justify-content: center; gap: 8px; padding: 18px 0 8px; }
-.bignum input { width: 180px; border: 0; background: transparent; text-align: center; font-family: var(--font-display); font-weight: 800; font-size: 72px; letter-spacing: -0.04em; padding: 0; }
+.bignum input { min-width: 1.4em; max-width: 4.2em; border: 0; background: transparent; text-align: center; font-family: var(--font-display); font-weight: 800; font-size: 72px; letter-spacing: -0.04em; padding: 0; }
 .bignum input:focus { outline: none; }
 .bignum span { font-size: 22px; color: var(--ink-3); font-weight: 600; }
 .nudge { display: flex; justify-content: center; gap: 10px; }
@@ -522,7 +523,7 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; letter-spacing: -0.02e
 .foodphoto svg, .foodphoto img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; object-fit: cover; }
 .chip.sm { height: 32px; padding: 0 12px; font-size: 13px; }
 .seg-wide { display: flex; width: 100%; }
-.seg-wide button { flex: 1; padding: 0 4px; font-size: 13px; }
+.seg-wide button { flex: 1 1 auto; justify-content: center; padding: 0 6px; font-size: 13px; white-space: nowrap; }
 
 .recipe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .rcard { position: relative; background: var(--surface); border-radius: 22px; box-shadow: var(--shadow); overflow: hidden; }
@@ -644,3 +645,28 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; letter-spacing: -0.02e
 .shop-item .s { display: block; font-size: 12px; color: var(--ink-3); max-width: 230px; }
 .shop-item.done .t { text-decoration: line-through; color: var(--ink-3); }
 .shop-item.done { opacity: 0.7; }
+
+/* ---------- Opschoning ---------- */
+.timein { display: block; width: auto; min-width: 112px; height: 38px; margin-top: 8px; padding: 0 10px; border-radius: 11px; font-weight: 700; font-size: 15px; }
+.ob-foot { position: sticky; bottom: 0; margin: 20px -20px 0; padding: 12px 20px calc(14px + env(safe-area-inset-bottom, 0px)); background: linear-gradient(to bottom, transparent, var(--bg) 22%); z-index: 2; }
+@media (max-width: 380px) {
+  .ring-center .big { font-size: 36px; }
+  .stat .v { font-size: 19px; }
+  .stat .l { font-size: 10.5px; letter-spacing: 0.04em; }
+  .daycard { padding: 18px 14px 14px; }
+  .macro { padding: 9px 9px; }
+}
+
+.exrow-go { width: 18px; height: 18px; color: var(--ink-3); flex: none; display: grid; }
+.exrow-go svg { width: 100%; height: 100%; }
+.cook-btn { padding: 0 16px; }
+.btn-sub { font-family: var(--font-body); font-weight: 600; font-size: 14px; opacity: 0.8; margin-left: 2px; }
+.foot-lbl { font-size: 11.5px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 6px; }
+.act-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 8px; }
+.act { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 74px; padding: 8px 4px; border-radius: 16px; background: var(--surface); border: 1.5px solid var(--line); }
+.act.on { border-color: var(--brand); background: color-mix(in srgb, var(--brand) 8%, var(--surface)); box-shadow: 0 0 0 1px var(--brand) inset; }
+.act-em { font-size: 24px; line-height: 1; }
+.act-name { font-size: 12px; font-weight: 600; line-height: 1.15; text-align: center; hyphens: auto; }
+.profile-stats { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.profile-stats span { font-size: 12px; color: var(--ink-2); background: var(--surface-2); border-radius: 99px; padding: 3px 9px; }
+.profile-stats b { color: var(--ink); }

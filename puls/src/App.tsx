@@ -41,7 +41,7 @@ function SheetHost() {
     case 'connect': return <ConnectSheet />;
     case 'exercise': return <ExerciseSheet id={sheet.id} slotKey={sheet.slotKey} />;
     case 'inbox': return <InboxSheet />;
-    case 'recipe': return <RecipeSheet key={sheet.id} id={sheet.id} meal={sheet.meal} />;
+    case 'recipe': return <RecipeSheet key={sheet.id} id={sheet.id} meal={sheet.meal} planned={sheet.factor} />;
     case 'shopping': return <ShoppingSheet />;
   }
 }

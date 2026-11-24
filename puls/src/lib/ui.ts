@@ -18,7 +18,7 @@ export type SheetState =
   | { type: 'connect' }
   | { type: 'exercise'; id: string; slotKey?: string }
   | { type: 'inbox' }
-  | { type: 'recipe'; id: string; meal?: MealKey }
+  | { type: 'recipe'; id: string; meal?: MealKey; /** portie uit het dagmenu */ factor?: number }
   | { type: 'shopping' };
 
 interface UI {

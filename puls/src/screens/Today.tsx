@@ -1,4 +1,4 @@
-import { useMemo, type ReactElement } from 'react';
+import { useEffect, useMemo, useState, type ReactElement } from 'react';
 import { mealRange, entryNutrients, stepsToKm, sumNutrients } from '../lib/calc';
 import { addDays, dateKey, dayTitle, fmt, greeting, liters, weekday } from '../lib/date';
 import { dayTotals, useDay, useMealRoom, usePlan, useTargets, useWaterTarget } from '../lib/hooks';
@@ -31,6 +31,7 @@ export function Today() {
   const remaining = Math.round(budget - eaten.kcal);
   const over = remaining < 0;
   const today = dateKey();
+  const narrow = useNarrow();
 
   return (
     <div className="page">
@@ -62,7 +63,7 @@ export function Today() {
             <div className="v num">{fmt(eaten.kcal)}</div>
             <div className="l">Gegeten</div>
           </div>
-          <Ring size={186} stroke={15} value={eaten.kcal / budget} color={over ? 'var(--protein)' : 'var(--brand)'} dot>
+          <Ring size={narrow ? 150 : 186} stroke={narrow ? 13 : 15} value={eaten.kcal / budget} color={over ? 'var(--protein)' : 'var(--brand)'} dot>
             <div className="ring-center">
               <div className="cap">{over ? 'Te veel' : 'Nog over'}</div>
               <div className="big num">{fmt(Math.abs(remaining))}</div>
@@ -296,7 +297,7 @@ function MealCard({ meal, date, kcal }: { meal: MealKey; date: string; kcal: num
         <div className="grow">
           <h3>{meta.label}</h3>
           <div className="small muted num">
-            {entries.length ? `${fmt(sum.kcal)} kcal · E ${fmt(sum.p)} g` : `Aanbevolen ${fmt(lo)} – ${fmt(hi)} kcal`}
+            {entries.length ? `${fmt(sum.kcal)} kcal · ${fmt(sum.p)} g eiwit` : `Aanbevolen ${fmt(lo)}–${fmt(hi)} kcal`}
           </div>
         </div>
         <button className={'addbtn' + (entries.length ? '' : ' solid')} onClick={() => open({ type: 'addFood', meal })} aria-label={`Toevoegen aan ${meta.label}`}>
@@ -340,4 +341,15 @@ function useMealIdea(meal: MealKey, date: string, enabled: boolean) {
     if (!enabled || !room) return null;
     return suggest(meal, room, { prefs, favorites, recent: recentlyEaten(days, date), seed: date })[0] ?? null;
   }, [enabled, room, meal, prefs, favorites, days, date]);
+}
+
+/** Smal scherm (kleine telefoons): compactere dagring. */
+function useNarrow(limit = 380) {
+  const [narrow, setNarrow] = useState(() => typeof window !== 'undefined' && window.innerWidth < limit);
+  useEffect(() => {
+    const on = () => setNarrow(window.innerWidth < limit);
+    window.addEventListener('resize', on);
+    return () => window.removeEventListener('resize', on);
+  }, [limit]);
+  return narrow;
 }
