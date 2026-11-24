@@ -5,7 +5,8 @@ import { ALL_EQUIP } from '../src/data/exercises';
 import { calcTargets, mealRange } from '../src/lib/calc';
 import { coachFeed } from '../src/lib/coach';
 import {
-  amountLabel, dayMenu, ingredients, mergeShopping, portionFor, portionText, recipeFood, recipeNutrients, recipeTags, roomFor, suggest,
+  amountLabel, amountText, dayMenu, ingredients, mergeShopping, portionFor, portionNutrients, portionText, PORTION_STEPS, recipeFood,
+  recipeNutrients, recipeTags, roomFor, scaledItems, suggest,
 } from '../src/lib/recipes';
 import { emptyDay } from '../src/lib/store';
 import { MEALS, type Profile } from '../src/lib/types';
@@ -52,8 +53,8 @@ describe('recipes', () => {
     expect(portionFor(r, kcal * 2)).toBe(2);
     expect(portionFor(r, kcal * 0.5)).toBe(0.5);
     expect(portionFor(r, kcal * 10)).toBe(2);
-    expect(portionText(1.25)).toBe('1¼ porties');
-    expect(portionText(0.75)).toBe('¾ portie');
+    expect(portionText(1.5)).toBe('1½ porties');
+    expect(portionText(0.5)).toBe('½ portie');
   });
 
   it('shows friendly amounts', () => {
@@ -91,11 +92,32 @@ describe('recipes', () => {
     for (const m of MEALS) expect(menu.items[m].recipe.meal).toBe(m);
   });
 
-  it('logs a recipe as one food with per-100 g values', () => {
+  it('logs a recipe as one food with per-100 g values of exactly that portion', () => {
     const r = RECIPES[0];
-    const f = recipeFood(r);
-    const n = recipeNutrients(r);
-    expect(f.kcal * (f.portions[0].g / 100)).toBeCloseTo(n.kcal, -1);
+    for (const factor of PORTION_STEPS) {
+      const f = recipeFood(r, factor);
+      const n = portionNutrients(r, factor);
+      expect(f.kcal * (n.grams / 100)).toBeCloseTo(n.kcal, -1);
+    }
+  });
+
+  it('never uses odd fractions: whole bread, eggs and slices, at most a half of fruit or a spoon', () => {
+    for (const r of RECIPES) {
+      for (const mult of [...PORTION_STEPS, 3, 4]) {
+        for (const a of scaledItems(r, mult)) {
+          const text = amountText(a).amount;
+          expect(text, `${r.id} ${mult}x ${a.food.name}`).not.toMatch(/[¼¾⅓⅔]|\d,\d/);
+          if (a.count !== undefined && a.count % 1) {
+            expect(['stuk', 'struik', 'eetlepel', 'theelepel'], `${a.food.name} ${text}`).toContain(a.unit);
+            if (a.unit === 'stuk') expect(['fruit', 'groente', 'beleg'], `${a.food.name} ${text}`).toContain(a.food.cat);
+          }
+        }
+      }
+    }
+    const bread = scaledItems(RECIPES.find((x) => x.id === 'roerei-spinazie')!, 1.5).find((a) => a.food.name === 'Volkorenbrood')!;
+    expect(amountText(bread).amount).toBe('3 sneetjes');
+    const eggs = scaledItems(RECIPES.find((x) => x.id === 'roerei-spinazie')!, 1.5).find((a) => a.food.name === 'Ei (rauw)')!;
+    expect(eggs.count! % 1).toBe(0);
   });
 
   it('merges shopping lists', () => {

@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 import { ALL_EQUIP } from '../data/exercises';
 import type { Food } from '../data/foods';
 import type { Recipe } from '../data/recipes';
-import { mergeShopping, portionText, recipeFood, type Prefs, type ShopItem } from './recipes';
+import { mergeShopping, portionNutrients, portionText, recipeFood, type Prefs, type ShopItem } from './recipes';
 import { dateKey } from './date';
 import type { ActivityEntry, DayLog, FoodEntry, MealKey, Profile, WeightEntry } from './types';
 
@@ -204,8 +204,9 @@ export const useStore = create<State>()(
         reset: () => set({ ...initial }),
 
         logRecipe: (date, meal, r, factor) => {
-          const food = recipeFood(r);
-          const grams = Math.round(food.portions[0].g * factor);
+          // waarden van precies deze portie, met hele sneetjes en eieren
+          const food = recipeFood(r, factor);
+          const grams = Math.round(portionNutrients(r, factor).grams);
           const entry: FoodEntry = { id: uid(), food, grams, label: portionText(factor) };
           updateDay(date, (d) => ({ ...d, meals: { ...d.meals, [meal]: [...d.meals[meal], entry] } }));
           set((s) => ({

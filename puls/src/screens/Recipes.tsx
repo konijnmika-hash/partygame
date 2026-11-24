@@ -6,7 +6,7 @@ import { AvatarButton, I, toast } from '../components/ui';
 import { dateKey, fmt } from '../lib/date';
 import { dayTotals, useMealRoom, useTargets } from '../lib/hooks';
 import {
-  dayMenu, portionFor, portionText, recentlyEaten, recipeNutrients, recipeTags, scaleN, suggest, TAG_LABEL, type RecipeTag,
+  dayMenu, portionFor, portionNutrients, portionText, recentlyEaten, recipeTags, suggest, TAG_LABEL, type RecipeTag,
 } from '../lib/recipes';
 import { useStore } from '../lib/store';
 import { MEALS, type MealKey } from '../lib/types';
@@ -118,7 +118,7 @@ export function RecipeCard({ recipe, meal }: { recipe: Recipe; meal?: MealKey })
   const cooked = useStore((s) => s.cooked[recipe.id] ?? 0);
   const open = useUI((s) => s.open);
   const factor = room ? portionFor(recipe, room.kcal) : 1;
-  const n = scaleN(recipeNutrients(recipe), factor);
+  const n = portionNutrients(recipe, factor);
   return (
     <article className="rcard">
       <button className="rcard-main" onClick={() => open({ type: 'recipe', id: recipe.id, meal })} aria-label={`${recipe.name} bekijken`}>

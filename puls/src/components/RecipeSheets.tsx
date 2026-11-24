@@ -4,7 +4,7 @@ import { RECIPE_BY_ID, type Recipe } from '../data/recipes';
 import { dateKey, fmt } from '../lib/date';
 import { dayTotals, useMealRoom, useTargets } from '../lib/hooks';
 import {
-  amountLabel, ingredients, plainName, portionFor, portionText, PORTION_STEPS, recipeNutrients, recipeTags, scaleN, TAG_LABEL,
+  amountText, ingredients, plainName, portionFor, portionNutrients, portionText, PORTION_STEPS, recipeTags, scaledItems, TAG_LABEL,
 } from '../lib/recipes';
 import { mealRange } from '../lib/calc';
 import { useStore } from '../lib/store';
@@ -39,8 +39,8 @@ export function RecipeSheet({ id, meal: mealProp, planned }: { id: string; meal?
   }, [advised]);
 
   if (!recipe || !t) return null;
-  const n = scaleN(recipeNutrients(recipe), factor);
-  const { items, extras } = ingredients(recipe);
+  const n = portionNutrients(recipe, factor);
+  const { extras } = ingredients(recipe);
   const tags = recipeTags(recipe);
   const eaten = day ? dayTotals(day).eaten : { kcal: 0, p: 0 };
   const after = Math.round(t.kcal - eaten.kcal - n.kcal);
@@ -103,7 +103,7 @@ export function RecipeSheet({ id, meal: mealProp, planned }: { id: string; meal?
             <p className="portion-why">
               {factor === advised
                 ? <><b>Afgestemd op jou.</b> {fromMenu ? 'Met deze portie haalt je dagmenu precies je doelen van vandaag.' : room?.adjusted ? `Op basis van wat je vandaag al at, houd ik voor ${MEAL_META[meal].label.toLowerCase()} ${fmt(Math.round((room.kcal) / 10) * 10)} kcal aan.` : `Voor ${MEAL_META[meal].label.toLowerCase()} past ${fmt(lo)}–${fmt(hi)} kcal bij jouw doel.`}{factor !== 1 && !fromMenu ? ` Daarom raad ik ${portionText(factor)} aan.` : ''}</>
-                : <>Ik raadde {portionText(advised)} aan ({fmt(recipeNutrients(recipe).kcal * advised)} kcal). <button className="link" onClick={() => setF(advised)}>Terug naar advies</button></>}
+                : <>Ik raadde {portionText(advised)} aan ({fmt(portionNutrients(recipe, advised).kcal)} kcal). <button className="link" onClick={() => setF(advised)}>Terug naar advies</button></>}
               {logDate === today && <> Na deze maaltijd heb je vandaag nog <b className="num">{after >= 0 ? `${fmt(after)} kcal` : `${fmt(-after)} kcal te veel`}</b>{after >= 0 ? ' over' : ''}.</>}
             </p>
           </section>
@@ -120,8 +120,9 @@ export function RecipeSheet({ id, meal: mealProp, planned }: { id: string; meal?
           </div>
           {servings > 1 && <p className="tiny" style={{ margin: '-4px 0 0' }}>Hoeveelheden voor {servings} personen. Jouw eigen deel daarvan is {portionText(factor)}.</p>}
           <ul className="ings">
-            {items.map(({ food, grams }) => {
-              const a = amountLabel(food, grams * mult);
+            {scaledItems(recipe, mult).map((it) => {
+              const { food } = it;
+              const a = amountText(it);
               const on = have.includes(food.id);
               return (
                 <li key={food.id}>
@@ -245,7 +246,7 @@ export function CookMode() {
   const steps = recipe.steps;
   const last = step >= steps.length;
   const cur = steps[Math.min(step, steps.length - 1)];
-  const { items, extras } = ingredients(recipe);
+  const { extras } = ingredients(recipe);
   const mult = cook.factor * cook.servings;
   const left = timer ? (timer.running ? Math.max(0, timer.end - Date.now()) : timer.left) : (cur.min ?? 0) * 60000;
   const mm = Math.floor(left / 60000);
@@ -264,7 +265,7 @@ export function CookMode() {
 
         {showIng && (
           <div className="card cook-ings">
-            {items.map(({ food, grams }) => { const a = amountLabel(food, grams * mult); return <div key={food.id} className="row between small"><span>{plainName(food.name)}</span><b className="num">{a.amount}</b></div>; })}
+            {scaledItems(recipe, mult).map((it) => { const a = amountText(it); return <div key={it.food.id} className="row between small"><span>{plainName(it.food.name)}</span><b className="num">{a.amount}</b></div>; })}
             {extras.map((e) => <div key={e} className="small muted">+ {e}</div>)}
           </div>
         )}
@@ -293,7 +294,7 @@ export function CookMode() {
           <div className="cook-step done" key="done">
             <div style={{ fontSize: 64 }}>🍽️</div>
             <h2 style={{ fontSize: 30 }}>Eet smakelijk!</h2>
-            <p className="muted" style={{ margin: 0 }}>Zal ik je portie ({portionText(cook.factor)}, {fmt(recipeNutrients(recipe).kcal * cook.factor)} kcal) meteen in je dagboek zetten?</p>
+            <p className="muted" style={{ margin: 0 }}>Zal ik je portie ({portionText(cook.factor)}, {fmt(portionNutrients(recipe, cook.factor).kcal)} kcal) meteen in je dagboek zetten?</p>
             <button
               className="btn block"
               onClick={() => {

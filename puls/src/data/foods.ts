@@ -122,7 +122,7 @@ const ROWS: Row[] = [
   ['Hummus', 'beleg', 290, 7.5, 13, 23, 'eetlepel:20'],
   ['Boter', 'beleg', 740, 0.7, 0.6, 82, 'op brood:5'],
   ['Halvarine', 'beleg', 355, 0.2, 0.5, 39, 'op brood:5'],
-  ['Avocado', 'beleg', 160, 2, 2, 15, 'halve:70|hele:140'],
+  ['Avocado', 'beleg', 160, 2, 2, 15, 'halve:70|stuk:140'],
   ['Ahornsiroop', 'beleg', 260, 0, 67, 0, 'eetlepel:20'],
 
   // Zuivel & eieren

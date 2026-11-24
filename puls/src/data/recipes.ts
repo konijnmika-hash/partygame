@@ -132,7 +132,7 @@ export const RECIPES: Recipe[] = [
     meal: 'ontbijt',
     minutes: 10,
     intro: 'Krokant zuurdesem, romige avocado en een zacht eitje. Gezonde vetten en eiwit die je tot de lunch vol houden.',
-    ing: [['Zuurdesembrood', 80], ['Avocado', 70], ['Ei (rauw)', 110], ['Tomaat', 45], ['Citroen', 5], 'chilivlokken', 'zout en peper'],
+    ing: [['Zuurdesembrood', 80], ['Avocado', 70], ['Ei (rauw)', 110], ['Tomaat', 45], ['Citroen', 10], 'chilivlokken', 'zout en peper'],
     steps: [
       { t: 'Kook water en pocheer of bak de eieren in 3 tot 4 minuten.', min: 4 },
       { t: 'Rooster intussen het brood.' },
@@ -169,7 +169,7 @@ export const RECIPES: Recipe[] = [
     meal: 'ontbijt',
     minutes: 5,
     intro: 'Dik, koud en knalpaars. Skyr maakt hem eiwitrijk, de toppings geven crunch.',
-    ing: [['Bosvruchten (diepvries)', 150], ['Banaan', 60], ['Skyr naturel', 150], ['Granola', 20], ['Kiwi', 40], ['Kokosrasp', 5]],
+    ing: [['Bosvruchten (diepvries)', 150], ['Banaan', 60], ['Skyr naturel', 150], ['Granola', 20], ['Kiwi', 38], ['Kokosrasp', 5]],
     steps: [
       { t: 'Blend de bevroren bosvruchten, banaan en skyr tot een dikke smoothie. Voeg alleen een scheutje water toe als het echt niet draait.' },
       { t: 'Giet in een kom.' },
@@ -187,7 +187,7 @@ export const RECIPES: Recipe[] = [
     meal: 'ontbijt',
     minutes: 5,
     intro: 'Een weekendontbijt dat in 5 minuten op tafel staat. Omega-3 uit de zalm en verse crunch van komkommer.',
-    ing: [['Bagel', 90], ['Smeerkaas', 30], ['Gerookte zalm', 50], ['Komkommer', 30], ['Citroen', 5], 'verse dille'],
+    ing: [['Bagel', 90], ['Smeerkaas', 30], ['Gerookte zalm', 60], ['Komkommer', 30], ['Citroen', 10], 'verse dille'],
     steps: [
       { t: 'Snijd de bagel open en rooster hem kort.' },
       { t: 'Besmeer met smeerkaas en beleg met komkommer en zalm.' },
@@ -353,7 +353,7 @@ export const RECIPES: Recipe[] = [
     meal: 'lunch',
     minutes: 15,
     intro: 'Alle smaak van een caesarsalade, met een yoghurtdressing die de helft lichter is.',
-    ing: [['Kipfilet (gebakken)', 120], ['Sla', 80], ['Parmezaanse kaas', 10], ['Volkorenbrood', 30], ['Griekse yoghurt 0%', 40], ['Mayonaise', 5], ['Citroen', 5], 'knoflook en mosterd'],
+    ing: [['Kipfilet (gebakken)', 120], ['Sla', 80], ['Parmezaanse kaas', 10], ['Volkorenbrood', 30], ['Griekse yoghurt 0%', 40], ['Mayonaise', 5], ['Citroen', 10], 'knoflook en mosterd'],
     steps: [
       { t: 'Bak de kip gaar en snijd in plakjes.', min: 8 },
       { t: 'Rooster blokjes brood in een droge pan tot croutons.', min: 3 },

@@ -85,35 +85,101 @@ export function fraction(n: number) {
   return (whole ? String(whole) : '') + FRACTION[rest];
 }
 
-const COUNTABLE = /^(stuk|snee|plak|eetlepel|theelepel|teentje|handje|bakje|glas|blik|bolletje|schep|stengel|struik|moot|filet|partje|schijf|kopje|bol)$/;
+/** Eenheden die je telt in een recept: sneetjes brood, eieren, plakken kaas, lepels. */
+const COUNT_UNITS = /^(stuk|snee|plak|bolletje|teentje|eetlepel|theelepel|schep|stengel|struik|moot|filet|partje|cherrytomaatje)$/;
+const PLURAL: Record<string, string> = {
+  stuk: 'stuks', snee: 'sneetjes', plak: 'plakken', bolletje: 'bolletjes', teentje: 'teentjes', eetlepel: 'eetlepels',
+  theelepel: 'theelepels', schep: 'scheppen', stengel: 'stengels', struik: 'struiken', moot: 'moten', filet: 'filets',
+  partje: 'partjes', cherrytomaatje: 'cherrytomaatjes',
+};
 
-/** "2 snee · 70 g" of "150 g" */
-export function amountLabel(food: Food, grams: number) {
-  const g = grams < 5 ? Math.round(grams * 2) / 2 : Math.round(grams);
-  const unit = food.unit === 'ml' ? 'ml' : 'g';
-  const base = `${String(g).replace('.', ',')} ${unit}`;
+/** Hiervan kun je gerust een halve gebruiken: lepels en fruit of groente per stuk. Brood, eieren en plakken alleen heel. */
+const halvable = (food: Food, unit: string, unitGrams: number) =>
+  unit.endsWith('lepel') ||
+  ((food.cat === 'fruit' || food.cat === 'groente' || food.name === 'Avocado') && (unit === 'stuk' || unit === 'struik') && unitGrams >= 50);
+
+/** De telbare eenheid waarin het recept dit ingrediënt gebruikt, bijv. 2 sneetjes of ½ banaan. */
+function countUnit(food: Food, baseGrams: number) {
   for (const p of food.portions) {
-    if (!COUNTABLE.test(p.label)) continue;
-    const n = grams / p.g;
-    if (n >= 0.25 && n <= 8 && Math.abs(n * 4 - Math.round(n * 4)) < 0.12) {
-      const q = Math.round(n * 4) / 4;
-      const label = q > 1 && p.label === 'snee' ? 'sneetjes' : q > 1 && p.label === 'stuk' ? 'stuks' : q > 1 && p.label === 'handje' ? 'handjes' : q > 1 && p.label.endsWith('lepel') ? p.label + 's' : p.label;
-      return { amount: `${fraction(q)} ${label}`, grams: base };
-    }
+    if (!COUNT_UNITS.test(p.label)) continue;
+    const n = baseGrams / p.g;
+    if (n < 0.5 || Math.abs(n * 2 - Math.round(n * 2)) > 0.1) continue;
+    if (p.label.endsWith('lepel') && n > 3) continue; // 5 eetlepels havermout leest beter als 50 g
+    return p;
   }
-  return { amount: base, grams: '' };
+  return null;
 }
 
-export const PORTION_STEPS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+/** Gram of ml afronden op wat je in de keuken echt afweegt. */
+const niceGrams = (g: number) => (g < 10 ? Math.max(1, Math.round(g)) : g < 100 ? Math.round(g / 5) * 5 : Math.round(g / 10) * 10);
 
-/** De portie (0,5× tot 2×) waarmee een recept het dichtst bij je doel voor die maaltijd komt. */
+export interface Amount {
+  food: Food;
+  /** afgeronde hoeveelheid in gram of ml */
+  grams: number;
+  /** aantal in de telbare eenheid, altijd heel of een halve */
+  count?: number;
+  unit?: string;
+}
+
+/** Eén ingrediënt geschaald en afgerond: hele sneetjes en eieren, hooguit een halve banaan of lepel. */
+export function scaleAmount(food: Food, baseGrams: number, mult: number): Amount {
+  const p = countUnit(food, baseGrams);
+  if (p) {
+    const step = halvable(food, p.label, p.g) ? 0.5 : 1;
+    const count = Math.max(step, Math.round((baseGrams * mult) / p.g / step) * step);
+    return { food, grams: count * p.g, count, unit: p.label };
+  }
+  return { food, grams: mult === 1 ? baseGrams : niceGrams(baseGrams * mult) };
+}
+
+/** Alle ingrediënten voor een portie (of voor meerdere personen). */
+export function scaledItems(r: Recipe, mult: number): Amount[] {
+  return ingredients(r).items.map(({ food, grams }) => scaleAmount(food, grams, mult));
+}
+
+/** "2 sneetjes · 70 g" of "150 g" */
+export function amountText(a: Amount) {
+  const unit = a.food.unit === 'ml' ? 'ml' : 'g';
+  const base = `${Math.round(a.grams)} ${unit}`;
+  if (a.count === undefined || !a.unit) return { amount: base, grams: '' };
+  return { amount: `${fraction(a.count)} ${a.count >= 2 ? PLURAL[a.unit] ?? a.unit : a.unit}`, grams: base };
+}
+
+/** Hoeveelheid voor een ingrediënt zoals het in het recept staat (zonder schalen). */
+export const amountLabel = (food: Food, grams: number) => amountText(scaleAmount(food, grams, 1));
+
+const portionCache = new Map<string, Nutrients & { grams: number }>();
+
+/** Voedingswaarden van precies wat je eet: berekend uit de afgeronde hoeveelheden. */
+export function portionNutrients(r: Recipe, factor: number) {
+  const key = `${r.id}|${factor}`;
+  let n = portionCache.get(key);
+  if (!n) {
+    n = { kcal: 0, p: 0, c: 0, f: 0, grams: 0 };
+    for (const { food, grams } of scaledItems(r, factor)) {
+      const k = grams / 100;
+      n.kcal += food.kcal * k;
+      n.p += food.p * k;
+      n.c += food.c * k;
+      n.f += food.f * k;
+      n.grams += grams;
+    }
+    portionCache.set(key, n);
+  }
+  return n;
+}
+
+/** Halve en hele porties: geen rare kwarten. */
+export const PORTION_STEPS = [0.5, 1, 1.5, 2];
+
+/** De portie (½ tot 2) waarmee een recept het dichtst bij je doel voor die maaltijd komt. */
 export function portionFor(r: Recipe, targetKcal: number) {
-  const kcal = recipeNutrients(r).kcal;
   const max = r.meal === 'snacks' ? 1.5 : 2;
   let best = 1;
   for (const f of PORTION_STEPS) {
     if (f > max) continue;
-    if (Math.abs(kcal * f - targetKcal) < Math.abs(kcal * best - targetKcal)) best = f;
+    if (Math.abs(portionNutrients(r, f).kcal - targetKcal) < Math.abs(portionNutrients(r, best).kcal - targetKcal)) best = f;
   }
   return best;
 }
@@ -184,7 +250,7 @@ export function suggest(
   return pool
     .map((recipe) => {
       const factor = portionFor(recipe, room.kcal);
-      const n = scaleN(recipeNutrients(recipe), factor);
+      const n = portionNutrients(recipe, factor);
       const kcalFit = 1 - Math.min(1, Math.abs(n.kcal - room.kcal) / room.kcal);
       const pFit = room.p > 0 ? Math.min(1, n.p / room.p) : 0.5;
       let score = kcalFit * 50 + pFit * 35;
@@ -236,9 +302,9 @@ export function dayMenu(t: Targets, prefs: Prefs, seed: string, favorites: strin
 
 /* ---------- Loggen ---------- */
 
-/** Een recept als één product in je dagboek, met waarden per 100 g. */
-export function recipeFood(r: Recipe): Food {
-  const n = recipeNutrients(r);
+/** Een recept als één product in je dagboek, met waarden per 100 g van precies jouw portie. */
+export function recipeFood(r: Recipe, factor = 1): Food {
+  const n = portionNutrients(r, factor);
   const per = 100 / n.grams;
   const round1 = (v: number) => Math.round(v * 10) / 10;
   return {
@@ -250,7 +316,7 @@ export function recipeFood(r: Recipe): Food {
     c: round1(n.c * per),
     f: round1(n.f * per),
     unit: 'g',
-    portions: [{ label: 'portie', g: Math.round(n.grams) }],
+    portions: [{ label: 'portie', g: Math.round(n.grams / factor) }],
     source: 'recipe',
   };
 }
@@ -275,7 +341,7 @@ export interface ShopItem {
 
 export function mergeShopping(list: ShopItem[], r: Recipe, factor: number): ShopItem[] {
   const out = list.map((i) => ({ ...i, from: [...i.from] }));
-  const { items, extras } = ingredients(r);
+  const { extras } = ingredients(r);
   const add = (id: string, name: string, grams?: number, unit?: 'g' | 'ml') => {
     const existing = out.find((i) => i.id === id && !i.done);
     if (existing) {
@@ -283,7 +349,7 @@ export function mergeShopping(list: ShopItem[], r: Recipe, factor: number): Shop
       if (!existing.from.includes(r.name)) existing.from.push(r.name);
     } else out.push({ key: `${id}:${Math.random().toString(36).slice(2, 8)}`, id, name, grams, unit, done: false, from: [r.name] });
   };
-  for (const { food, grams } of items) add(food.id, plainName(food.name), grams * factor, food.unit);
+  for (const { food, grams } of scaledItems(r, factor)) add(food.id, plainName(food.name), grams, food.unit);
   for (const e of extras) add('x-' + e.toLowerCase(), e[0].toUpperCase() + e.slice(1));
   return out;
 }
