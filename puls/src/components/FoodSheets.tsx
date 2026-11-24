@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { CATEGORY_EMOJI, CATEGORY_LABEL, FOODS, searchFoods, type Food, type FoodCategory } from '../data/foods';
 import { fmt } from '../lib/date';
 import { lookupBarcode, searchOff } from '../lib/openfoodfacts';
+import { CAMERA_HELP, cameraAllowedHere, cameraProblem, decodeFile, getDecoder, inFrame, type CameraProblem } from '../lib/barcode';
 import { RECIPE_FOODS } from '../lib/recipes';
 import { newId, useStore } from '../lib/store';
 import { useUI } from '../lib/ui';
@@ -353,56 +354,63 @@ function CustomFood({ onSaved }: { onSaved: (f: Food) => void }) {
   );
 }
 
-interface BarcodeDetectorLike { detect: (src: CanvasImageSource) => Promise<{ rawValue: string }[]> }
-
 function Scanner({ onFound }: { onFound: (f: Food) => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
   const [code, setCode] = useState('');
-  const [status, setStatus] = useState<string>('Camera starten…');
-  const [busy, setBusy] = useState(false);
-  const supported = typeof window !== 'undefined' && 'BarcodeDetector' in window;
+  const [phase, setPhase] = useState<'starting' | 'live' | 'problem' | 'looking'>('starting');
+  const [problem, setProblem] = useState<CameraProblem | null>(null);
+  const [note, setNote] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
+  const busy = phase === 'looking';
 
   const lookup = async (c: string) => {
-    setBusy(true);
-    setStatus(`Product ${c} opzoeken…`);
+    setPhase('looking');
+    setNote(`Barcode ${c} gevonden, product opzoeken…`);
+    navigator.vibrate?.(30);
     try {
       const food = await lookupBarcode(c);
-      if (food) onFound(food);
-      else setStatus('Dit product staat nog niet in de database. Maak het zelf aan via “Eigen”.');
+      if (food) return onFound(food);
+      setNote(`Product ${c} staat nog niet in de database. Maak het zelf aan via “Eigen”.`);
     } catch {
-      setStatus('Opzoeken lukt nu niet. Controleer je internetverbinding.');
-    } finally {
-      setBusy(false);
+      setNote(inFrame() ? 'In deze voorbeeldversie kan Puls de online productdatabase niet bereiken. Via de eigen link werkt het wel.' : 'Opzoeken lukt nu niet. Controleer je internetverbinding.');
     }
+    setCode(c);
+    setPhase(problem ? 'problem' : 'live');
   };
 
+  // camera starten en blijven lezen tot er een barcode in beeld is
   useEffect(() => {
-    if (!supported) {
-      setStatus('Je browser ondersteunt scannen met de camera niet. Typ de cijfers onder de barcode hieronder in.');
-      return;
-    }
     let stream: MediaStream | undefined;
     let stop = false;
+    setPhase('starting');
+    setProblem(null);
     (async () => {
       try {
-        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-        const v = videoRef.current!;
+        if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia || !cameraAllowedHere()) throw new Error('geen camera hier');
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
+        if (stop) return;
+        const v = videoRef.current;
+        if (!v) throw new Error('geen videoveld');
         v.srcObject = stream;
         await v.play();
-        setStatus('Richt de camera op de barcode');
-        const Detector = (window as unknown as { BarcodeDetector: new (o: object) => BarcodeDetectorLike }).BarcodeDetector;
-        const det = new Detector({ formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e'] });
+        setPhase('live');
+        const dec = await getDecoder();
         while (!stop) {
-          const res = await det.detect(v).catch(() => []);
-          if (res[0]?.rawValue) {
-            stop = true;
-            lookup(res[0].rawValue);
-            break;
+          if (v.readyState >= 2) {
+            const found = await dec.decode(v);
+            if (found && !stop) {
+              stop = true;
+              lookup(found);
+              break;
+            }
           }
-          await new Promise((r) => setTimeout(r, 300));
+          await new Promise((r) => setTimeout(r, dec.kind === 'native' ? 250 : 120));
         }
-      } catch {
-        setStatus('Geen toegang tot de camera. Typ de barcode hieronder in.');
+      } catch (err) {
+        if (stop) return;
+        setProblem(cameraProblem(err));
+        setPhase('problem');
       }
     })();
     return () => {
@@ -410,20 +418,53 @@ function Scanner({ onFound }: { onFound: (f: Food) => void }) {
       stream?.getTracks().forEach((t) => t.stop());
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [attempt]);
+
+  const fromPhoto = async (file?: File) => {
+    if (!file) return;
+    setNote('Foto lezen…');
+    try {
+      const c = await decodeFile(file);
+      if (c) return lookup(c);
+      setNote('Geen barcode gevonden op de foto. Zorg dat de streepjes scherp en recht in beeld zijn, of typ de cijfers in.');
+    } catch {
+      setNote('Deze foto kon ik niet openen. Probeer een andere.');
+    }
+  };
+
+  const help = problem ? CAMERA_HELP[problem] : null;
 
   return (
     <div className="stack">
-      {supported && (
-        <div className="video-box">
-          <video ref={videoRef} playsInline muted />
-          <div className="frame" />
+      <div className="video-box" hidden={phase === 'problem'}>
+        <video ref={videoRef} playsInline muted autoPlay />
+        <div className={'frame' + (phase === 'live' ? ' scanning' : '')}><i /></div>
+        {phase === 'starting' && <div className="video-note">Camera starten…</div>}
+      </div>
+      {phase === 'live' && !note && <div className="small muted" style={{ textAlign: 'center' }}>Houd de barcode in het kader. Scannen gaat vanzelf.</div>}
+      {help && (
+        <div className="cam-help" role="alert">
+          <span className="cam-help-ico"><I.info /></span>
+          <div>
+            <b>{help.title}</b>
+            <p>{help.text}</p>
+            {problem !== 'blocked' && problem !== 'insecure' && problem !== 'nocamera' && <button className="btn sm" onClick={() => setAttempt((a) => a + 1)}>Opnieuw proberen</button>}
+          </div>
         </div>
       )}
-      <div className="small muted">{status}</div>
-      <div className="row">
-        <input id="barcode" className="input num grow" inputMode="numeric" placeholder="Bijv. 8710400035508" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} />
-        <button className="btn sm" disabled={code.length < 8 || busy} onClick={() => lookup(code)}>Zoek</button>
+      {note && <div className="small" role="status" style={{ color: 'var(--ink-2)' }}>{note}</div>}
+
+      <button className="btn ghost block" onClick={() => fileRef.current?.click()} disabled={busy}>
+        <span className="i20"><I.camera /></span> Foto van de barcode
+      </button>
+      <input ref={fileRef} type="file" accept="image/*" capture="environment" hidden onChange={(e) => { fromPhoto(e.target.files?.[0]); e.target.value = ''; }} />
+
+      <div className="field">
+        <label htmlFor="barcode">Of typ de cijfers onder de streepjes</label>
+        <div className="row">
+          <input id="barcode" className="input num grow" inputMode="numeric" placeholder="Bijv. 8710400035508" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} onKeyDown={(e) => e.key === 'Enter' && code.length >= 8 && lookup(code)} />
+          <button className="btn sm" style={{ height: 52 }} disabled={code.length < 8 || busy} onClick={() => lookup(code)}>Zoek</button>
+        </div>
       </div>
     </div>
   );
