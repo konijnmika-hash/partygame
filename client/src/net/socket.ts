@@ -7,6 +7,7 @@ import { api } from './api';
 import { addEmote, get, go, pushGameEvent, resetGame, set, toast } from '../state/store';
 import { sfx } from '../audio/sfx';
 import { P2P } from '../p2p/mode';
+import { updateIfOutdated } from './freshReload';
 
 
 type S = Socket<ServerToClientEvents, ClientToServerEvents>;
@@ -202,6 +203,8 @@ export async function joinRoom(code: string): Promise<boolean> {
 }
 
 export async function createRoom(settings: any = null): Promise<boolean> {
+  // the host's tab runs the room: never start a party on an outdated copy of the site
+  if (P2P && (await updateIfOutdated())) return false;
   const r = await emitAck<{ code: string }>('room:create', settings);
   if (!r.ok) {
     toast(r.error || 'Could not create a room', 'error');

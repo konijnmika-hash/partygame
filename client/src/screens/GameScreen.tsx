@@ -5,6 +5,7 @@ import type { InputFrame } from '@shared/types';
 import { useStore } from '../state/store';
 import { emit } from '../net/socket';
 import { forgetView, getView, isChunkLoadError } from '../game/registry';
+import { freshReload, handleStaleBuild, reloadEndsParty } from '../net/freshReload';
 import type { GameViewProps } from '../game/types';
 import { SoundToggles } from '../components/TopBar';
 import { CountUp, Spinner } from '../components/ui';
@@ -17,6 +18,8 @@ class GameErrorBoundary extends Component<{ children: ReactNode; gameId: string 
   }
   override componentDidCatch(err: Error) {
     console.error('game view crashed', err);
+    // stale page after a site update: fetch the new version right away (once)
+    if (isChunkLoadError(err)) handleStaleBuild();
   }
   override render() {
     const err = this.state.err;
@@ -30,11 +33,13 @@ class GameErrorBoundary extends Component<{ children: ReactNode; gameId: string 
             <h2>{stale ? 'Could not load this game 📡' : 'Oops! This game hiccuped 😵'}</h2>
             <p className="muted small">
               {stale
-                ? 'The connection dropped or Bloop Bash was just updated. Reload the page to get the latest version.'
+                ? reloadEndsParty()
+                  ? 'Bloop Bash was just updated (or the connection dropped). Reload to get the latest version — as the host, reloading ends this party, so start a new room afterwards.'
+                  : 'Bloop Bash was just updated (or the connection dropped). Reload the page to get the latest version — you rejoin the room automatically.'
                 : 'Your progress is safe. Try reloading the view.'}
             </p>
             {stale ? (
-              <button className="btn btn-pink" onClick={() => window.location.reload()}>Reload page</button>
+              <button className="btn btn-pink" onClick={() => freshReload(true)}>Reload page</button>
             ) : (
               <button
                 className="btn btn-pink"
