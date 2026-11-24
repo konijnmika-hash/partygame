@@ -140,7 +140,7 @@ export function roomFor(meal: MealKey, t: Targets, day: DayLog | undefined, eate
   const leftK = Math.max(0, t.kcal - eaten.kcal);
   const leftP = Math.max(0, t.p - eaten.p);
   const hi = mealRange(meal, t.kcal)[1];
-  const kcal = Math.max(base * 0.45, Math.min(hi * 1.1, leftK * share));
+  const kcal = Math.max(base * 0.45, Math.min(hi, leftK * share));
   return { kcal, p: leftP * share, adjusted: Math.abs(kcal - base) > 60 };
 }
 
