@@ -1,8 +1,6 @@
 # Publishes the browser-hosted version of Bloop Bash to GitHub Pages
 # (https://<user>.github.io/<repo>/). Rooms run in the host player's browser and friends connect
 # over WebRTC, so no game server is needed.
-# The Puls app is published alongside it at https://<user>.github.io/<repo>/puls/ (https, so the
-# phone camera for the barcode scanner works and the app can be installed on the home screen).
 name: Deploy to GitHub Pages
 
 on:
@@ -28,18 +26,10 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: |
-            package-lock.json
-            puls/package-lock.json
       - run: npm ci
       - run: npm run build:pages
         env:
           PAGES_BASE: /${{ github.event.repository.name }}/
-      - name: Build Puls into /puls/
-        working-directory: puls
-        run: |
-          npm ci
-          npm run build -- --outDir ../dist/pages/puls --emptyOutDir
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist/pages
