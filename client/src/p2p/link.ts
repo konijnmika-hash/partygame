@@ -281,6 +281,7 @@ export class P2PSocket {
             clearTimeout(timer);
             resolve(backend);
           } else {
+            retryUntil = 0; // a later drop gets its own full retry window
             this.setConnected(true);
             for (const fn of this.ioHandlers.get('reconnect') ?? []) fn();
           }
@@ -300,7 +301,8 @@ export class P2PSocket {
           }
         });
         c.on('close', () => {
-          if (closed || dc !== c) return;
+          // ignore hang-ups of a link we already left (or replaced)
+          if (closed || dc !== c || (settled && this.backend !== backend)) return;
           if (!settled) return fail('Could not join');
           // host tab hiccup / network switch: keep trying for a while
           this.setConnected(false);
@@ -313,8 +315,9 @@ export class P2PSocket {
       peer.on('error', (err: any) => {
         if (err?.type === 'peer-unavailable') {
           if (!settled) fail('Room not found. Check the code — the host must keep their tab open.');
+          else if (closed || this.backend !== backend) return;
           else if (retryUntil && Date.now() < retryUntil) setTimeout(dial, 2000);
-          else if (settled) this.hostGone();
+          else this.hostGone();
         } else if (!settled) fail('Could not reach the connection service. Check your internet.');
       });
       peer.on('disconnected', () => !closed && !peer.destroyed && setTimeout(() => !peer.destroyed && peer.reconnect(), 1500));
@@ -336,6 +339,9 @@ export class P2PSocket {
     this.backend = null;
     this.hub = null;
     this.hostPeer = null;
+    // without a room there is nothing to be disconnected from (a lost link to a host must not
+    // keep the app stuck "reconnecting" after leaving)
+    this.setConnected(true);
     if (b) {
       b.emit('room:leave', []);
       setTimeout(() => {
@@ -350,6 +356,7 @@ export class P2PSocket {
   private dropBackend() {
     this.backend?.close();
     this.backend = null;
+    this.setConnected(true);
     if (this.hub) {
       this.hub.close();
       this.hub = null;
