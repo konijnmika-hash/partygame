@@ -222,7 +222,9 @@ export async function quickPlay(): Promise<boolean> {
 }
 
 export async function leaveRoom(): Promise<void> {
-  await emitAck('room:leave');
+  // leaving must work while the link is down too: otherwise the room pulls us back in on reconnect
+  if (socket && !socket.connected) (socket.emit as any)('room:leave', () => {});
+  else await emitAck('room:leave');
   set({ room: null, results: null, final: null, chat: [] });
   resetGame(null);
   updateUrl(null);
