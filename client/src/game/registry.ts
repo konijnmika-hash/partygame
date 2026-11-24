@@ -26,10 +26,33 @@ export function getView(id: string): LazyExoticComponent<ComponentType<GameViewP
   if (!loader) return null;
   let l = lazies.get(id);
   if (!l) {
-    l = lazy(loader as () => Promise<{ default: ComponentType<GameViewProps> }>);
+    l = lazy(() => withRetry(loader) as Promise<{ default: ComponentType<GameViewProps> }>);
     lazies.set(id, l);
   }
   return l;
+}
+
+/** Drop a cached (failed) view so the next render downloads it again. */
+export function forgetView(id: string): void {
+  lazies.delete(id);
+}
+
+/** A flaky phone connection shouldn't break a round: try the download a few times. */
+async function withRetry<T>(load: () => Promise<T>, tries = 3): Promise<T> {
+  for (let i = 1; ; i++) {
+    try {
+      return await load();
+    } catch (err) {
+      if (i >= tries) throw err;
+      await new Promise((r) => setTimeout(r, 600 * i));
+    }
+  }
+}
+
+/** True when a code chunk could not be downloaded (offline, or the site was updated meanwhile). */
+export function isChunkLoadError(err: unknown): boolean {
+  const msg = String((err as Error)?.message ?? err);
+  return /dynamically imported module|Importing a module script failed|error loading dynamically|Loading chunk|ChunkLoadError|Unable to preload/i.test(msg);
 }
 
 /** Warm the chunk during the intro screen so the game starts instantly. */
