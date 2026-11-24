@@ -27,7 +27,6 @@ export interface CoachCtx {
   workout?: WorkoutDay;
   nextWorkout?: WorkoutDay;
   weights: WeightEntry[];
-  addBurned: boolean;
 }
 
 const TIPS = [
@@ -59,8 +58,8 @@ export function streakFor(days: Record<string, DayLog>, today: string) {
 export function coachFeed(c: CoachCtx): CoachMsg[] {
   const { profile, t, day, hour } = c;
   const out: CoachMsg[] = [];
-  const { eaten, burned, count } = dayTotals(day);
-  const budget = t.kcal + (c.addBurned ? burned : 0);
+  const { eaten, count } = dayTotals(day);
+  const budget = t.kcal;
   const workoutDone = !!c.workout && day.workoutsDone.includes(c.workout.id);
 
   if (c.date !== c.today) {
@@ -112,7 +111,7 @@ export function coachFeed(c: CoachCtx): CoachMsg[] {
 
   // Calorieën
   if (eaten.kcal > budget * 1.1) {
-    out.push({ id: 'kcal-over', tone: 'tip', prio: 40, title: 'Iets boven je doel', text: 'Geen ramp: één dag maakt het verschil niet. Een extra wandeling helpt, en morgen pak je het gewoon weer op.', action: { label: 'Activiteit', kind: 'activity' } });
+    out.push({ id: 'kcal-over', tone: 'tip', prio: 40, title: 'Iets boven je doel', text: 'Geen ramp: één dag maakt het verschil niet. Morgen pak je het gewoon weer op.' });
   } else if (hour >= 19 && eaten.kcal >= budget * 0.85) {
     out.push({ id: 'kcal-good', tone: 'cheer', prio: 62, title: 'Mooi binnen je calorieën', text: `${fmt(eaten.kcal)} van ${fmt(budget)} kcal. Zo bouw je aan blijvend resultaat.` });
   }

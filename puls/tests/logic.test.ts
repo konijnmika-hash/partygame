@@ -144,12 +144,18 @@ describe('workout plans', () => {
 
 describe('coach', () => {
   const t = calcTargets(base);
-  const ctx = (o: object) => ({ profile: base, t, day: emptyDay(), days: {}, date: '2026-11-24', today: '2026-11-24', hour: 9, waterTarget: 3000, weights: [], addBurned: true, ...o });
+  const ctx = (o: object) => ({ profile: base, t, day: emptyDay(), days: {}, date: '2026-11-24', today: '2026-11-24', hour: 9, waterTarget: 3000, weights: [], ...o });
   it('plans the morning and nudges when behind', () => {
     expect(coachFeed(ctx({ hour: 8 })).some((m) => m.id === 'plan')).toBe(true);
     const evening = coachFeed(ctx({ hour: 18 }));
     expect(evening[0].tone).toBe('nudge');
     expect(evening.some((m) => m.id === 'water')).toBe(true);
+  });
+  it('does not add burned calories to what you can eat', () => {
+    const oats = FOODS.find((f) => f.name === 'Havermout')!;
+    const grams = ((t.kcal * 1.15) / oats.kcal) * 100;
+    const day = { ...emptyDay(), activities: [{ id: 'a', name: 'Hardlopen', emoji: '🏃', minutes: 60, kcal: 800 }], meals: { ...emptyDay().meals, ontbijt: [{ id: 'e', food: oats, grams, label: '' }] } };
+    expect(coachFeed(ctx({ hour: 20, day })).some((m) => m.id === 'kcal-over')).toBe(true);
   });
   it('cheers when goals are reached', () => {
     const day = { ...emptyDay(), waterMl: 3200, steps: 12000 };

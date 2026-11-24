@@ -20,12 +20,12 @@ export const MEAL_META: Record<MealKey, { label: string; icon: () => ReactElemen
 
 export function Today() {
   const profile = useStore((s) => s.profile)!;
-  const addBurned = useStore((s) => s.addBurned);
   const { date, setDate, open } = useUI();
   const t = useTargets()!;
   const day = useDay(date);
   const { eaten, burned } = dayTotals(day);
-  const budget = t.kcal + (addBurned ? burned : 0);
+  // Verbrande kcal tellen bewust niet mee: het calorie-doel houdt al rekening met je activiteit
+  const budget = t.kcal;
   const remaining = Math.round(budget - eaten.kcal);
   const over = remaining < 0;
   const today = dateKey();
@@ -106,7 +106,7 @@ export function Today() {
             <div className="meal-icon" style={{ background: 'color-mix(in srgb, var(--steps) 16%, transparent)', color: 'var(--steps)' }}><I.flame /></div>
             <div className="grow">
               <b>Nog niets gelogd</b>
-              <div className="small muted">Hardlopen, fietsen of een training? Verbrande kcal komen bij je budget.</div>
+              <div className="small muted">Hardlopen, fietsen of een training? Houd hier bij wat je verbrandt. Dit komt niet bij je eetbudget.</div>
             </div>
           </div>
         ) : (

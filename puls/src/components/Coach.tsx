@@ -12,7 +12,6 @@ export function useCoachCtx(date: string): CoachCtx | null {
   const profile = useStore((s) => s.profile);
   const days = useStore((s) => s.days);
   const weights = useStore((s) => s.weights);
-  const addBurned = useStore((s) => s.addBurned);
   const t = useTargets();
   const plan = usePlan();
   const day = useDay(date);
@@ -26,11 +25,11 @@ export function useCoachCtx(date: string): CoachCtx | null {
     if (!profile || !t) return null;
     const wd = weekday(date);
     return {
-      profile, t, day, days, date, today: dateKey(), hour, waterTarget, weights, addBurned,
+      profile, t, day, days, date, today: dateKey(), hour, waterTarget, weights,
       workout: plan.find((p) => p.weekday === wd),
       nextWorkout: plan.find((p) => p.weekday > wd) ?? plan[0],
     };
-  }, [profile, t, day, days, date, hour, waterTarget, weights, addBurned, plan]);
+  }, [profile, t, day, days, date, hour, waterTarget, weights, plan]);
 }
 
 export function useCoachAction() {

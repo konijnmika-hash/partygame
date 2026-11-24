@@ -61,7 +61,6 @@ interface State {
   lifts: Record<string, number>;
   premium: boolean;
   glassMl: number;
-  addBurned: boolean;
   stepsSource: 'handmatig' | 'health';
   reminders: Reminders;
   /** per dag: welke reminders al zijn verstuurd */
@@ -84,7 +83,7 @@ interface State {
   toggleFavorite: (id: string) => void;
   addCustomFood: (f: Food) => void;
   setPremium: (v: boolean) => void;
-  setSettings: (s: Partial<Pick<State, 'glassMl' | 'addBurned' | 'stepsSource'>>) => void;
+  setSettings: (s: Partial<Pick<State, 'glassMl' | 'stepsSource'>>) => void;
   setReminders: (r: Partial<Reminders>) => void;
   markFired: (date: string, id: string) => void;
   markCheered: (date: string, ids: string[]) => void;
@@ -101,7 +100,6 @@ const initial = {
   lifts: {},
   premium: false,
   glassMl: 250,
-  addBurned: true,
   stepsSource: 'handmatig' as const,
   reminders: DEFAULT_REMINDERS,
   fired: {} as Record<string, string[]>,

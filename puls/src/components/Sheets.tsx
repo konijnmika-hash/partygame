@@ -379,7 +379,6 @@ export function ExerciseSheet({ id, slotKey }: { id: string; slotKey?: string })
 
 export function SettingsRows() {
   const glass = useStore((s) => s.glassMl);
-  const addBurned = useStore((s) => s.addBurned);
   const set = useStore((s) => s.setSettings);
   return (
     <div className="list">
@@ -388,10 +387,6 @@ export function SettingsRows() {
         <div className="seg">
           {[200, 250, 330].map((ml) => <button key={ml} className={glass === ml ? 'on' : ''} onClick={() => set({ glassMl: ml })}>{ml}</button>)}
         </div>
-      </div>
-      <div className="item">
-        <div className="grow"><div className="t">Verbrand bij budget optellen</div><div className="s">Sporten geeft je extra calorieën voor die dag</div></div>
-        <Switch on={addBurned} onChange={(v) => set({ addBurned: v })} label="Verbrande calorieën optellen" />
       </div>
     </div>
   );
