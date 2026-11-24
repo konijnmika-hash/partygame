@@ -4,6 +4,7 @@ import { connectSocket, emit, emitAck } from './net/socket';
 import { get, hadLocalSettings, saveLocalSettings, set } from './state/store';
 import { setVolumes, unlockAudio } from './audio/sfx';
 import { normalizeRoomCode } from '@shared/validation';
+import { updateIfOutdated } from './net/freshReload';
 
 let saveTimer: number | null = null;
 
@@ -63,6 +64,8 @@ export async function boot(): Promise<void> {
     tries++;
     await new Promise((res) => setTimeout(res, Math.min(8000, 800 * tries)));
   }
+  // a browser-cached page from before a site update would fail to load its games
+  void updateIfOutdated();
   const cat = await api<{ available: string[] }>('/catalog');
   if (cat.ok && cat.data) set({ available: new Set(cat.data.available) });
   connectSocket();
